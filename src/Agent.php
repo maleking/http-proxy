@@ -1,6 +1,6 @@
 <?php
 
-namespace Akrez\HttpRunner;
+namespace Akrez\HttpProxy;
 
 use Akrez\HttpRunner\SapiEmitter;
 use Exception;
