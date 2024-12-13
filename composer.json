@@ -1,0 +1,31 @@
+{
+    "name": "akrez/http-proxy",
+    "type": "library",
+    "description": "Akrez http proxy",
+    "keywords": [
+        "akrez",
+        "proxy",
+        "http",
+        "agent"
+    ],
+    "require": {
+        "php": "^8.0",
+        "guzzlehttp/guzzle": "*",
+        "akrez/http-runner": "*"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "*",
+        "laravel/pint": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Akrez\\HttpProxy\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Akrez",
+            "email": "akrez.like@gmail.com"
+        }
+    ]
+}
