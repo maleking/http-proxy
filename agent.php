@@ -1,6 +1,6 @@
 <?php
 
-use Akrez\HttpRunner\Agent;
+use Akrez\HttpProxy\Agent;
 use GuzzleHttp\Psr7\ServerRequest;
 
 require_once './vendor/autoload.php';
