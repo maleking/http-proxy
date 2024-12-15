@@ -34,4 +34,5 @@ def request(flow: HTTPFlow):
 
     flow.request.headers["host"] = new_host
 
-    # print(flow.request.scheme + "://" + (flow.request.host) + (flow.request.path) + "\r\n")
+def response(flow: http.HTTPFlow):
+    print("["+strftime("%H:%M:%S", gmtime()) + "] " + str(flow.response.status_code) + " " + flow.request.scheme + "://" + (flow.request.host) + (flow.request.path) + "\r\n")
