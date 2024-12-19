@@ -10,8 +10,8 @@ if ($version === false) {
     }
 }
 
-// use first argument as output file or use "agent-{version}.php"
-$out = isset($argv[1]) ? $argv[1] : ('agent-' . $version . '.php');
+// use first argument as output file or use "index-{version}.php"
+$out = isset($argv[1]) ? $argv[1] : ('index-' . $version . '.php');
 
 system('composer install --no-dev --classmap-authoritative');
 $classes = require __DIR__ . '/vendor/composer/autoload_classmap.php';
@@ -44,14 +44,14 @@ echo ' DONE' . PHP_EOL;
 // resulting list of all includes and ordered class list
 $files = array_merge($includes, $ordered);
 echo 'Concatenating ' . count($files) . ' files into ' . $out . '...';
-system('sed -n "/\#\!/,/^$/p" agent.php | sed -e "s/version dev/version ' . $version . '/" > ' . escapeshellarg($out));
+system('sed -n "/\#\!/,/^$/p" index.php | sed -e "s/version dev/version ' . $version . '/" > ' . escapeshellarg($out));
 
 foreach ($files as $file) {
     $file = substr($file, strlen(__DIR__) + 1);
     system('(echo "# ' . $file . '"; grep -v "<?php" ' . escapeshellarg($file) . ') >> ' . escapeshellarg($out));
 }
 
-$file = 'agent.php';
+$file = 'index.php';
 system('(echo "# ' . $file . '"; egrep -v "^<\?php|^\(@include " ' . escapeshellarg($file) . ') | sed -e "s/development/release/;/define(\'VERSION\'/c const VERSION=\"' . $version . '\";" >> ' . escapeshellarg($out));
 chmod($out, 0755);
 echo ' DONE (' . filesize($out) . ' bytes)' . PHP_EOL;
