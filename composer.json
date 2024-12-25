@@ -9,7 +9,7 @@
         "agent"
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^8",
         "guzzlehttp/guzzle": "*",
         "akrez/http-runner": "*"
     },
@@ -20,6 +20,11 @@
     "autoload": {
         "psr-4": {
             "Akrez\\HttpProxy\\": "src/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.0.0"
         }
     },
     "authors": [
