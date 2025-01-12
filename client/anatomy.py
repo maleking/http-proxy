@@ -27,7 +27,7 @@ def request(flow: HTTPFlow):
     # print(assemble_request(flow.request))
     # print("["+strftime("%H:%M:%S", gmtime()) + "] " + flow.request.http_version.ljust(9, ' ') + flow.request.method.ljust(8, ' ') + flow.request.host)
 
-    flow.request.path           = new_path_prefix + "?" + flow.request.method + "_" +  flow.request.scheme + "_" + old_http_version + "/" + (flow.request.host) + (flow.request.path)
+    flow.request.path           = new_path_prefix + "/" + flow.request.method + "_" +  flow.request.scheme + "_" + old_http_version + "/" + (flow.request.host) + (flow.request.path)
     flow.request.method         = "POST"
     flow.request.http_version   = "HTTP/2.0"
     flow.request.scheme         = new_scheme

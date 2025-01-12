@@ -10,7 +10,6 @@ use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\RequestInterface;
@@ -29,7 +28,7 @@ class Agent
         $defaultUri = $serverRequest->getUri();
 
         $newSchema = ($schema ?: $defaultUri->getScheme());
-        $newUri = ($url ? new Uri($newSchema . '://' . $url) : $defaultUri)->withScheme($newSchema);
+        $newUri = ($url ? new Uri($newSchema.'://'.$url) : $defaultUri)->withScheme($newSchema);
 
         $serverRequest = $serverRequest->withUri($newUri);
 
@@ -146,13 +145,21 @@ class Agent
         }
     }
 
-    public static function new(RequestInterface $serverRequest)
+    public static function new(ServerRequestInterface $serverRequest)
     {
-        $url = ltrim($serverRequest->getUri()->getQuery(), " \n\r\t\v\0/");
-        if (empty($url)) {
+        $serverParams = $serverRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
+
+        $requestUri = $serverParams['REQUEST_URI'];
+        $scriptNameSlash = $serverParams['SCRIPT_NAME'].'/';
+
+        if (
+            strpos($requestUri, $scriptNameSlash) === 0 and
+            strlen($scriptNameSlash) < strlen($requestUri)
+        ) {
+            $url = substr($requestUri, strlen($scriptNameSlash));
+        } else {
             return null;
         }
-
         $parts = explode('/', $url, 2) + [0 => null, 1 => null];
 
         if (false === strpos($parts[0], '.')) {
