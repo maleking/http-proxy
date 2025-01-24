@@ -151,7 +151,7 @@ class Agent
 
         $requestUri = $serverParams['REQUEST_URI'];
         $scriptNameSlash = $serverParams['SCRIPT_NAME'].'/';
-
+  
         if (
             strpos($requestUri, $scriptNameSlash) === 0 and
             strlen($scriptNameSlash) < strlen($requestUri)
@@ -161,13 +161,11 @@ class Agent
             return null;
         }
         $parts = explode('/', $url, 2) + [0 => null, 1 => null];
-
+        
+        $configs = [];
         if (false === strpos($parts[0], '.')) {
             $configs = explode('_', $parts[0]);
             $url = $parts[1];
-        } else {
-            $configs = [];
-            $url = $parts[0];
         }
 
         if (empty($url)) {
