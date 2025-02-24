@@ -1,8 +1,8 @@
 <?php
 
-use Akrez\HttpProxy\Agent;
+use Akrez\HttpProxy\AgentFactory;
 use GuzzleHttp\Psr7\ServerRequest;
 
 require_once './vendor/autoload.php';
 
-Agent::new(ServerRequest::fromGlobals())?->emit(300);
+AgentFactory::byServerRequest(ServerRequest::fromGlobals())?->emit(300);

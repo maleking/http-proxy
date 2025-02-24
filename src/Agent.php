@@ -8,13 +8,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Message;
-use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 class Agent
@@ -23,29 +20,9 @@ class Agent
 
     protected bool $debug;
 
-    public function __construct(RequestInterface $serverRequest, ?string $url = null, ?string $method = null, ?string $schema = null, ?string $protocolVersion = null, bool $debug = false)
+    public function __construct(RequestInterface $request, $debug = false)
     {
-        $defaultUri = $serverRequest->getUri();
-
-        $newSchema = ($schema ?: $defaultUri->getScheme());
-        $newUri = ($url ? new Uri($newSchema.'://'.$url) : $defaultUri)->withScheme($newSchema);
-
-        $serverRequest = $serverRequest->withUri($newUri);
-
-        if ($method) {
-            $serverRequest = $serverRequest->withMethod($method);
-        }
-
-        if ($protocolVersion) {
-            $serverRequest = $serverRequest->withProtocolVersion(strval($protocolVersion));
-        }
-
-        if ($multipartBoundary = $this->getMultipartBoundary($serverRequest)) {
-            $multipartStream = $this->getMultipartStream($multipartBoundary, $serverRequest);
-            $serverRequest = $serverRequest->withBody($multipartStream);
-        }
-
-        $this->request = $this->prepareRequest($serverRequest);
+        $this->request = $request;
         $this->debug = boolval($debug);
     }
 
@@ -63,53 +40,10 @@ class Agent
     {
         if ($this->getDebug()) {
             $response = new Response(200, [], Message::toString($this->getRequest()));
-            (new SapiEmitter())->emit($response);
+            (new SapiEmitter)->emit($response);
         } else {
-            $this->sendRequest($this->request, $timeout, $clientConfig);
+            $this->sendRequest($this->getRequest(), $timeout, $clientConfig);
         }
-    }
-
-    protected function prepareRequest(RequestInterface $request): RequestInterface
-    {
-        return $request;
-    }
-
-    protected function getMultipartBoundary(RequestInterface $request): ?string
-    {
-        $contentType = $request->getHeaderLine('Content-Type');
-
-        if (
-            strpos($contentType, 'multipart/form-data') === 0 and
-            preg_match('/boundary=(.*)$/', $contentType, $matches)
-        ) {
-            return trim($matches[1], '"');
-        }
-
-        return null;
-    }
-
-    protected function getMultipartStream(string $multipartBoundary, ServerRequestInterface $request)
-    {
-        $elements = [];
-
-        foreach ($request->getParsedBody() as $key => $value) {
-            $elements[] = [
-                'name' => $key,
-                'contents' => $value,
-            ];
-        }
-
-        foreach ($request->getUploadedFiles() as $key => $value) {
-            if (empty($value->getError())) {
-                $elements[] = [
-                    'name' => $key,
-                    'filename' => $value->getClientFilename(),
-                    'contents' => $value->getStream(),
-                ];
-            }
-        }
-
-        return new MultipartStream($elements, $multipartBoundary);
     }
 
     protected function sendRequest(RequestInterface $request, $timeout, $clientConfig): Response
@@ -127,7 +61,7 @@ class Agent
             'referer' => false,
             'sink' => fopen('php://output', 'w'),
             'on_headers' => function (ResponseInterface $response) {
-                (new SapiEmitter())->emit($response, true);
+                (new SapiEmitter)->emit($response, true);
             },
             RequestOptions::DECODE_CONTENT => false,
         ], $clientConfig));
@@ -143,53 +77,5 @@ class Agent
         } catch (Exception $e) {
             return new Response(500, [], json_encode((array) $e), 1.1, 'Internal Server Exception Error');
         }
-    }
-
-    public static function new(ServerRequestInterface $serverRequest)
-    {
-        $serverParams = $serverRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
-
-        $requestUri = $serverParams['REQUEST_URI'];
-        $scriptNameSlash = $serverParams['SCRIPT_NAME'].'/';
-  
-        if (
-            strpos($requestUri, $scriptNameSlash) === 0 and
-            strlen($scriptNameSlash) < strlen($requestUri)
-        ) {
-            $url = substr($requestUri, strlen($scriptNameSlash));
-        } else {
-            return null;
-        }
-        $parts = explode('/', $url, 2) + [0 => null, 1 => null];
-        
-        $configs = [];
-        if (false === strpos($parts[0], '.')) {
-            $configs = explode('_', $parts[0]);
-            $url = $parts[1];
-        }
-
-        if (empty($url)) {
-            return null;
-        }
-
-        return new static(
-            $serverRequest,
-            $url,
-            static::findInArray($configs, ['get', 'post', 'head', 'put', 'delete', 'options', 'trace', 'connect', 'patch'], $serverRequest->getMethod()),
-            static::findInArray($configs, ['https', 'http'], $serverRequest->getUri()->getScheme()),
-            static::findInArray([10, 11, 20, 30], $configs, $serverRequest->getProtocolVersion() * 10) / 10.0,
-            static::findInArray($configs, ['debug'], false)
-        );
-    }
-
-    protected static function findInArray(array $needles, array $haystack, string $default = null): ?string
-    {
-        foreach ($needles as $needle) {
-            if (in_array(strtolower($needle), $haystack)) {
-                return $needle;
-            }
-        }
-
-        return $default;
     }
 }
