@@ -9,13 +9,12 @@
         "agent"
     ],
     "require": {
-        "php": "^8",
+        "php": "^8.0",
         "guzzlehttp/guzzle": "*",
         "akrez/http-runner": "*"
     },
     "require-dev": {
-        "symfony/var-dumper": "*",
-        "laravel/pint": "*"
+        "symfony/var-dumper": "*"
     },
     "autoload": {
         "psr-4": {

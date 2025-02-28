@@ -5,4 +5,9 @@ use GuzzleHttp\Psr7\ServerRequest;
 
 require_once './vendor/autoload.php';
 
-AgentFactory::byServerRequest(ServerRequest::fromGlobals())?->emit(300);
+$serverRequest = ServerRequest::fromGlobals();
+
+$agent = AgentFactory::byServerRequest($serverRequest);
+if ($agent) {
+    $agent->emit(300);
+}
