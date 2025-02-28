@@ -63,7 +63,7 @@ class Agent
             'on_headers' => function (ResponseInterface $response) {
                 (new SapiEmitter)->emit($response, true);
             },
-            RequestOptions::DECODE_CONTENT => false,
+            'decode_content' => false,
         ], $clientConfig));
 
         try {
