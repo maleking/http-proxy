@@ -25,31 +25,23 @@ class Agent
         $this->debug = boolval($debug);
     }
 
-    public function getRequest()
-    {
-        return $this->request;
-    }
-
-    public function getDebug()
-    {
-        return $this->debug;
-    }
-
     public function emit($timeout = 60, $clientConfig = [])
-    {
-        if ($this->getDebug()) {
-            $response = new Response(200, [], Message::toString($this->getRequest()));
-            (new SapiEmitter)->emit($response);
-        } else {
-            $this->sendRequest($this->getRequest(), $timeout, $clientConfig);
-        }
-    }
-
-    protected function sendRequest(RequestInterface $request, $timeout, $clientConfig): Response
     {
         ini_set('output_buffering', 'Off');
         ini_set('output_handler', '');
         ini_set('zlib.output_compression', 0);
+
+        $response = $this->sendRequest($this->request, $timeout, $clientConfig, $this->debug);
+        if ($response) {
+            (new SapiEmitter)->emit($response);
+        }
+    }
+
+    protected function sendRequest(RequestInterface $request, $timeout, $clientConfig, $debug): ?Response
+    {
+        if ($debug) {
+            return new Response(200, [], Message::toString($request));
+        }
 
         $client = new Client(array_replace_recursive([
             'timeout' => $timeout,
@@ -66,7 +58,9 @@ class Agent
         ], $clientConfig));
 
         try {
-            return $client->send($request);
+            $client->send($request);
+
+            return null;
         } catch (ClientException $e) {
             return $e->getResponse();
         } catch (ServerException $e) {
