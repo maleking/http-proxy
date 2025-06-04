@@ -16,9 +16,19 @@ class Agent
     const STATE_DEBUG = 'debug';
 
     protected function __construct(
-        public readonly RequestInterface $request,
-        public readonly ?string $state
+        protected RequestInterface $request,
+        protected ?string $state
     ) {}
+
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    public function getState()
+    {
+        return $this->state;
+    }
 
     public static function makeByServerRequest(ServerRequestInterface $serverRequest)
     {

@@ -13,8 +13,8 @@ $serverRequest = ServerRequest::fromGlobals();
 
 $agent = Agent::makeByServerRequest($serverRequest);
 if ($agent) {
-    if ($agent->state === Agent::STATE_DEBUG) {
-        (new SapiEmitter)->emit(new Response(200, [], Message::toString($agent->request)));
+    if ($agent->getState() === Agent::STATE_DEBUG) {
+        (new SapiEmitter)->emit(new Response(200, [], Message::toString($agent->getRequest())));
     } else {
         $streamer = new SimpleStreamer('php://output', 'w+');
         $exception = $agent->emit($streamer, 3);
