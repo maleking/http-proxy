@@ -1,13 +1,25 @@
 <?php
 
-use Akrez\HttpProxy\AgentFactory;
+use Akrez\HttpProxy\Agent;
+use Akrez\HttpProxy\SimpleStreamer;
+use Akrez\HttpRunner\SapiEmitter;
+use GuzzleHttp\Psr7\Message;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 
 require_once './vendor/autoload.php';
 
 $serverRequest = ServerRequest::fromGlobals();
 
-$agent = AgentFactory::byServerRequest($serverRequest);
+$agent = Agent::makeByServerRequest($serverRequest);
 if ($agent) {
-    $agent->emit(300);
+    if ($agent->state === Agent::STATE_DEBUG) {
+        (new SapiEmitter)->emit(new Response(200, [], Message::toString($agent->request)));
+    } else {
+        $streamer = new SimpleStreamer('php://output', 'w+');
+        $exception = $agent->emit($streamer, 3);
+        if ($exception) {
+            (new SapiEmitter)->emit(new Response(500, [], $exception->getMessage()));
+        }
+    }
 }
