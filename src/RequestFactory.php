@@ -61,38 +61,13 @@ class RequestFactory
 
         $newUrl = $configs['scheme'].'://'.$parts[1];
 
-        $newUri = static::cloneUri($serverRequest->getUri(), $newUrl);
+        $newUri = new Uri($newUrl);
 
         $this->request = static::cloneRequest($serverRequest, $newUri, $configs['method'], $configs['protocolVersion']);
 
         $this->state = $configs['state'];
 
         return $this->successful = true;
-    }
-
-    protected static function cloneUri(Uri $uri, string $url): Uri
-    {
-        $uriUserInfos = explode(':', $uri->getUserInfo()) + [0 => '', 1 => ''];
-
-        $components = array_filter(parse_url($url)) + [
-            'scheme' => $uri->getScheme(),
-            'user' => $uriUserInfos[0],
-            'pass' => $uriUserInfos[1],
-            'host' => $uri->getHost(),
-            'port' => $uri->getPort(),
-            'path' => $uri->getPath(),
-            'query' => $uri->getQuery(),
-            'fragment' => $uri->getFragment(),
-        ];
-
-        return (new Uri)
-            ->withScheme($components['scheme'])
-            ->withHost($components['host'])
-            ->withPort($components['port'])
-            ->withPath($components['path'])
-            ->withQuery($components['query'])
-            ->withFragment($components['fragment'])
-            ->withUserInfo($components['user'], $components['pass']);
     }
 
     protected static function cloneRequest(RequestInterface $serverRequest, Uri $newUri, ?string $method = null, ?string $protocolVersion = null)
