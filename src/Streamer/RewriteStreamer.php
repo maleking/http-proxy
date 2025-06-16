@@ -110,7 +110,7 @@ class RewriteStreamer implements StreamInterface
         $this->response = $this->response->withoutHeader('content-length');
         $this->response = $this->response->withoutHeader('transfer-encoding');
 
-        $contents = (new $this->rewriter)->convert($contents, $this->request->getUri()->__toString());
+        $contents = $this->rewriter->convert($contents, $this->request->getUri()->__toString());
 
         $response = $this->cloneResponse($this->response, $contents);
 
