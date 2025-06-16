@@ -11,14 +11,7 @@ abstract class Rewriter
 
     abstract public function convert($body, $mainPageUrl);
 
-    abstract public function getMyContentType();
-
-    public function isMyContentType(ResponseInterface $response)
-    {
-        $contentTypes = (array) $response->getHeader('Content-Type');
-
-        return $this->getMyContentType() === trim(preg_replace('@;.*@', '', reset($contentTypes)));
-    }
+    abstract public function isMine($response);
 
     public function encryptUrl(string $urlString, ?string $mainUrlString = null)
     {
@@ -45,6 +38,13 @@ abstract class Rewriter
         }
 
         return $url->toString();
+    }
+
+    public static function isContentType(string $contentType, ResponseInterface $response)
+    {
+        $contentTypes = (array) $response->getHeader('Content-Type');
+
+        return $contentType === trim(preg_replace('@;.*@', '', reset($contentTypes)));
     }
 
     public static function trim(string $url)

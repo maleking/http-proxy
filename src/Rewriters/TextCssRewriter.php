@@ -4,9 +4,9 @@ namespace Akrez\HttpProxy\Rewriters;
 
 class TextCssRewriter extends Rewriter
 {
-    public function getMyContentType()
+    public function isMine($response)
     {
-        return 'text/css';
+        return $this->isContentType('text/css', $response);
     }
 
     public function convert($body, $mainPageUrl)

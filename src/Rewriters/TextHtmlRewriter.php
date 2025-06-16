@@ -4,9 +4,9 @@ namespace Akrez\HttpProxy\Rewriters;
 
 class TextHtmlRewriter extends Rewriter
 {
-    public function getMyContentType()
+    public function isMine($response)
     {
-        return 'text/html';
+        return $this->isContentType('text/html', $response);
     }
 
     public function convert($body, $mainPageUrl)
