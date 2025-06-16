@@ -19,7 +19,7 @@ class RewriteStreamer implements StreamInterface
 {
     use StreamDecoratorTrait;
 
-    protected $rewriter = null;
+    protected $rewriters = [];
 
     protected ?ResponseInterface $response = null;
 
@@ -72,7 +72,7 @@ class RewriteStreamer implements StreamInterface
         try {
             $client = new Client($clientConfig);
             $client->send($request);
-            if ($this->rewriter) {
+            if ($this->rewriters) {
                 return $this->emitRewritedResponse();
             }
         } catch (Throwable $e) {
@@ -88,12 +88,12 @@ class RewriteStreamer implements StreamInterface
     {
         $this->response = $response;
 
-        $this->rewriter = $this->detectRewriter($response);
+        $this->rewriters = $this->detectRewriters($response);
 
         // write cookie
         // rewrite location header
 
-        if ($this->rewriter) {
+        if ($this->rewriters) {
             $this->response = $this->response->withoutHeader('content-length');
             $this->filename = tempnam(sys_get_temp_dir(), 'rewrite_streamer_');
         } else {
@@ -110,26 +110,29 @@ class RewriteStreamer implements StreamInterface
         $this->response = $this->response->withoutHeader('content-length');
         $this->response = $this->response->withoutHeader('transfer-encoding');
 
-        $contents = $this->rewriter->convert($contents, $this->request->getUri()->__toString());
+        foreach ($this->rewriters as $rewriter) {
+            $contents = $rewriter->convert($contents, $this->request->getUri()->__toString());
+        }
 
         $response = $this->cloneResponse($this->response, $contents);
 
         (new SapiEmitter)->emit($response);
     }
 
-    protected function detectRewriter(ResponseInterface $response)
+    protected function detectRewriters(ResponseInterface $response)
     {
+        $rewriters = [];
         foreach ([
             TextHtmlRewriter::class,
             TextCssRewriter::class,
         ] as $rewriterClass) {
             $rewriter = new $rewriterClass($response);
             if ($rewriter->isMine($response)) {
-                return $rewriter;
+                $rewriters[] = $rewriter;
             }
         }
 
-        return null;
+        return $rewriters;
     }
 
     public function cloneResponse($response, $body)

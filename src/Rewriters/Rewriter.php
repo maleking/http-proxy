@@ -2,6 +2,7 @@
 
 namespace Akrez\HttpProxy\Rewriters;
 
+use Akrez\HttpProxy\RequestFactory;
 use League\Uri\Uri;
 use Psr\Http\Message\ResponseInterface;
 
@@ -25,10 +26,10 @@ abstract class Rewriter
 
             $newUrlString = $url->toString();
             if (strpos($newUrlString, 'https://') === 0) {
-                $newUrlString = substr_replace($newUrlString, 'https/', 0, strlen('https://'));
+                $newUrlString = substr_replace($newUrlString, RequestFactory::STATE_REWRITE.'_https/', 0, strlen('https://'));
             }
             if (strpos($newUrlString, 'http://') === 0) {
-                $newUrlString = substr_replace($newUrlString, 'http/', 0, strlen('http://'));
+                $newUrlString = substr_replace($newUrlString, RequestFactory::STATE_REWRITE.'_http/', 0, strlen('http://'));
             }
 
             return static::suggestBaseUrl().'/'.$newUrlString;
