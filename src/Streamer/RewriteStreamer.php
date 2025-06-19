@@ -44,7 +44,7 @@ class RewriteStreamer implements StreamInterface
         return Utils::streamFor(Utils::tryFopen($this->filename, $this->mode));
     }
 
-    public function emit($request, $timeout = null): null|Exception|Throwable
+    public function emit(RequestInterface $request, $timeout = null): null|Exception|Throwable
     {
         ini_set('output_buffering', 'Off');
         ini_set('output_handler', '');
