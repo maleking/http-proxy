@@ -2,9 +2,7 @@
 
 namespace Akrez\HttpProxy\Rewriters;
 
-use Akrez\HttpProxy\RequestFactory;
 use Akrez\HttpProxy\Streamer\RewriteStreamer;
-use League\Uri\Uri;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class Rewriter
@@ -17,29 +15,7 @@ abstract class Rewriter
 
     public function encryptUrl(string $urlString, ?string $mainUrlString = null)
     {
-        try {
-
-            if ($mainUrlString) {
-                $url = Uri::fromBaseUri($urlString, $mainUrlString);
-            } else {
-                $url = Uri::new($urlString);
-            }
-
-            $newUrlString = $url->toString();
-            if (strpos($newUrlString, 'https://') === 0) {
-                $newUrlString = substr_replace($newUrlString, RequestFactory::STATE_REWRITE.'_https/', 0, strlen('https://'));
-            }
-            if (strpos($newUrlString, 'http://') === 0) {
-                $newUrlString = substr_replace($newUrlString, RequestFactory::STATE_REWRITE.'_http/', 0, strlen('http://'));
-            }
-
-            return static::suggestBaseUrl().'/'.$newUrlString;
-
-        } catch (\Throwable $th) {
-            return $urlString;
-        }
-
-        return $url->toString();
+        return $this->rewriteStreamer->rewriteCrypt->encryptUrl($urlString, $mainUrlString);
     }
 
     public static function isContentType(string $contentType, ResponseInterface $response)
@@ -52,11 +28,6 @@ abstract class Rewriter
     public static function trim(string $url)
     {
         return trim($url, " \n\r\t\v\0/");
-    }
-
-    public static function suggestBaseUrl(): string
-    {
-        return static::trim($_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME']);
     }
 
     public static function startsWith($haystack, $needles)

@@ -4,6 +4,7 @@ namespace Akrez\HttpProxy\Streamer;
 
 use Akrez\HttpProxy\Rewriters\TextCssRewriter;
 use Akrez\HttpProxy\Rewriters\TextHtmlRewriter;
+use Akrez\HttpProxy\Support\RewriteCrypt;
 use Akrez\HttpRunner\SapiEmitter;
 use Exception;
 use GuzzleHttp\Client;
@@ -25,17 +26,13 @@ class RewriteStreamer implements StreamInterface
 
     private ?RequestInterface $request;
 
-    private string $filename;
-
-    private string $mode;
-
     private ?StreamInterface $stream;
 
-    public function __construct(string $filename, string $mode)
-    {
-        $this->filename = $filename;
-        $this->mode = $mode;
-
+    public function __construct(
+        public RewriteCrypt $rewriteCrypt,
+        private string $filename,
+        private string $mode
+    ) {
         unset($this->stream);
     }
 
