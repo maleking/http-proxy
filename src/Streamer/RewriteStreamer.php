@@ -126,7 +126,7 @@ class RewriteStreamer implements StreamInterface
             TextHtmlRewriter::class,
             TextCssRewriter::class,
         ] as $rewriterClass) {
-            $rewriter = new $rewriterClass($response);
+            $rewriter = new $rewriterClass($this);
             if ($rewriter->isMine($response)) {
                 $rewriters[] = $rewriter;
             }

@@ -3,12 +3,13 @@
 namespace Akrez\HttpProxy\Rewriters;
 
 use Akrez\HttpProxy\RequestFactory;
+use Akrez\HttpProxy\Streamer\RewriteStreamer;
 use League\Uri\Uri;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class Rewriter
 {
-    public function __construct() {}
+    public function __construct(protected RewriteStreamer $rewriteStreamer) {}
 
     abstract public function convert($body, $mainPageUrl);
 

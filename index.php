@@ -13,12 +13,12 @@ require_once './vendor/autoload.php';
 $requestFactory = new RequestFactory(ServerRequest::fromGlobals());
 if ($requestFactory->isSuccessful()) {
     if ($requestFactory->getState() === RequestFactory::STATE_SIMPLE) {
-        $streamer = new SimpleStreamer('php://output', '+w');
+        $streamer = new SimpleStreamer('php://output', 'w+');
         $error = $streamer->emit($requestFactory->getRequest());
     } elseif ($requestFactory->getState() === RequestFactory::STATE_DEBUG) {
         $error = new Exception(nl2br(Message::toString($requestFactory->getRequest())));
     } elseif ($requestFactory->getState() === RequestFactory::STATE_REWRITE) {
-        $streamer = new RewriteStreamer('php://output', 'w');
+        $streamer = new RewriteStreamer('php://output', 'w+');
         $error = $streamer->emit($requestFactory->getRequest());
     } else {
         $error = null;
