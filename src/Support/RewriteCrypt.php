@@ -3,13 +3,13 @@
 namespace Akrez\HttpProxy\Support;
 
 use Akrez\HttpProxy\RequestFactory;
+use GuzzleHttp\Psr7\ServerRequest;
 use League\Uri\Uri;
-use Psr\Http\Message\RequestInterface;
 
 class RewriteCrypt
 {
     public function __construct(
-        protected RequestInterface $serverRequest
+        protected ServerRequest $serverRequest
     ) {}
 
     public function encryptUrl(string $urlString, ?string $mainUrlString = null)
@@ -30,7 +30,7 @@ class RewriteCrypt
                 $newUrlString = substr_replace($newUrlString, RequestFactory::STATE_REWRITE.'_http/', 0, strlen('http://'));
             }
 
-            return static::suggestBaseUrl().'/'.$newUrlString;
+            return $this->suggestBaseUrl().'/'.$newUrlString;
 
         } catch (\Throwable $th) {
             return $urlString;
@@ -39,13 +39,14 @@ class RewriteCrypt
         return $url->toString();
     }
 
-    public static function suggestBaseUrl(): string
+    public function suggestBaseUrl(): string
     {
-        return static::trim($_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME']);
-    }
+        $serverParams = $this->serverRequest->getServerParams() + [
+            'REQUEST_SCHEME' => null,
+            'HTTP_HOST' => null,
+            'SCRIPT_NAME' => null,
+        ];
 
-    public static function trim(string $url)
-    {
-        return trim($url, " \n\r\t\v\0/");
+        return $serverParams['REQUEST_SCHEME'].'://'.$serverParams['HTTP_HOST'].$serverParams['SCRIPT_NAME'];
     }
 }
