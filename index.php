@@ -15,16 +15,16 @@ if ($requestFactory->isSuccessful()) {
     if ($requestFactory->getState() === RequestFactory::STATE_SIMPLE) {
         $streamer = new SimpleStreamer('php://output', '+w');
         $error = $streamer->emit($requestFactory->getRequest());
-        if ($error) {
-            (new SapiEmitter)->emit(new Response(200, [], $error->getMessage()));
-        }
     } elseif ($requestFactory->getState() === RequestFactory::STATE_DEBUG) {
-        (new SapiEmitter)->emit(new Response(200, [], Message::toString($requestFactory->getRequest())));
+        $error = new Exception(nl2br(Message::toString($requestFactory->getRequest())));
     } elseif ($requestFactory->getState() === RequestFactory::STATE_REWRITE) {
         $streamer = new RewriteStreamer('php://output', 'w');
         $error = $streamer->emit($requestFactory->getRequest());
-        if ($error) {
-            (new SapiEmitter)->emit(new Response(200, [], $error->getMessage()));
-        }
+    } else {
+        $error = null;
+    }
+    //
+    if ($error) {
+        (new SapiEmitter)->emit(new Response(500, [], $error->getMessage()));
     }
 }
