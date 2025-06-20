@@ -74,6 +74,9 @@ class SimpleStreamer implements StreamInterface
 
     public function onHeaders(ResponseInterface $response)
     {
-        (new SapiEmitter)->emit($response, true);
+        $cloneResponse = (clone $response)
+            ->withoutHeader('Content-Length')
+            ->withoutHeader('Transfer-Encoding');
+        (new SapiEmitter)->emit($cloneResponse, true);
     }
 }
