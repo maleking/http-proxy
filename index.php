@@ -23,7 +23,7 @@ if ($requestFactory->isSuccessful()) {
     } elseif ($requestFactory->getState() === RequestFactory::STATE_REWRITE) {
         $rewriteCrypt = new RewriteCrypt($serverRequest);
         $rewriteCookie = new RewriteCookie('PC');
-        $streamer = new RewriteStreamer($rewriteCrypt,$rewriteCookie, 'php://output', 'w+');
+        $streamer = new RewriteStreamer($rewriteCrypt, $rewriteCookie, 'php://output', 'w+');
         $error = $streamer->emit($requestFactory->getRequest());
     } else {
         $error = null;

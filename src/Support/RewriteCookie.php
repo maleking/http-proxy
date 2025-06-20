@@ -43,7 +43,7 @@ class RewriteCookie
         if ($sendCookies) {
             $request = CookieJar::fromArray($sendCookies, $domain)->withCookieHeader($request);
         }
-        
+
         return $request;
     }
 
