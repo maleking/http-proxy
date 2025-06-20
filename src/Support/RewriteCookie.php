@@ -37,7 +37,8 @@ class RewriteCookie
         }
         //
         if ($cookieJarArray) {
-            $request = (new CookieJar(false, $cookieJarArray))->withCookieHeader($request);
+            $cookieJar = new CookieJar(false, $cookieJarArray);
+            $request = $cookieJar->withCookieHeader($request);
         }
 
         return $request;
@@ -47,13 +48,17 @@ class RewriteCookie
     {
         $setCookieHeaders = $response->getHeader('set-cookie');
         if ($setCookieHeaders) {
+            $domain = strval($request->getUri()->getHost());
             $response = $response->withoutHeader('set-cookie');
             foreach ($setCookieHeaders as $setCookieHeader) {
                 $targetSetCookie = SetCookie::fromString($setCookieHeader);
+                if (! $targetSetCookie->getDomain()) {
+                    $targetSetCookie->setDomain($domain);
+                }
                 $newSetCookieName = sprintf(
                     '%s_%s__%s',
                     $this->cookiePrefix,
-                    str_replace('.', '_', strval($request->getUri()->getHost())),
+                    str_replace('.', '_', $domain),
                     $targetSetCookie->getName()
                 );
 
