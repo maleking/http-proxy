@@ -3,6 +3,7 @@
 use Akrez\HttpProxy\RequestFactory;
 use Akrez\HttpProxy\Streamer\RewriteStreamer;
 use Akrez\HttpProxy\Streamer\SimpleStreamer;
+use Akrez\HttpProxy\Support\RewriteCookie;
 use Akrez\HttpProxy\Support\RewriteCrypt;
 use Akrez\HttpRunner\SapiEmitter;
 use GuzzleHttp\Psr7\Message;
@@ -21,7 +22,8 @@ if ($requestFactory->isSuccessful()) {
         $error = $streamer->emit($requestFactory->getRequest());
     } elseif ($requestFactory->getState() === RequestFactory::STATE_REWRITE) {
         $rewriteCrypt = new RewriteCrypt($serverRequest);
-        $streamer = new RewriteStreamer($rewriteCrypt, 'php://output', 'w+');
+        $rewriteCookie = new RewriteCookie('PC');
+        $streamer = new RewriteStreamer($rewriteCrypt,$rewriteCookie, 'php://output', 'w+');
         $error = $streamer->emit($requestFactory->getRequest());
     } else {
         $error = null;

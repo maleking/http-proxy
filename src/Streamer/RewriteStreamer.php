@@ -4,6 +4,7 @@ namespace Akrez\HttpProxy\Streamer;
 
 use Akrez\HttpProxy\Rewriters\TextCssRewriter;
 use Akrez\HttpProxy\Rewriters\TextHtmlRewriter;
+use Akrez\HttpProxy\Support\RewriteCookie;
 use Akrez\HttpProxy\Support\RewriteCrypt;
 use Akrez\HttpRunner\SapiEmitter;
 use Exception;
@@ -30,6 +31,7 @@ class RewriteStreamer implements StreamInterface
 
     public function __construct(
         public RewriteCrypt $rewriteCrypt,
+        public RewriteCookie $rewriteCookie,
         private string $filename,
         private string $mode
     ) {
@@ -87,15 +89,19 @@ class RewriteStreamer implements StreamInterface
 
         $this->rewriters = $this->detectRewriters($response);
 
-        // write cookie
+        $this->response = $this->rewriteCookie->onHeadersReceived($this->request, $this->response);
         // rewrite location header
 
         if ($this->rewriters) {
-            $this->response = $this->response->withoutHeader('content-length');
             $this->filename = tempnam(sys_get_temp_dir(), 'rewrite_streamer_');
+            $this->response = $this->response
+                ->withoutHeader('Content-Length')
+                ->withoutHeader('Transfer-Encoding');
         } else {
             $this->filename = 'php://output';
-            (new SapiEmitter)->emit($response, true);
+            (new SapiEmitter)->emit((clone $this->response)
+                ->withoutHeader('Content-Length')
+                ->withoutHeader('Transfer-Encoding'), true);
         }
     }
 
