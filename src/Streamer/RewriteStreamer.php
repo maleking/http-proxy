@@ -90,7 +90,15 @@ class RewriteStreamer implements StreamInterface
         $this->rewriters = $this->detectRewriters($response);
 
         $this->response = $this->rewriteCookie->onHeadersReceived($this->request, $this->response);
-        // rewrite location header
+        
+        $locationHeaders = $response->getHeader('location');
+        if ($locationHeaders) {
+            $this->response = $this->response->withoutHeader('location');
+            foreach ($locationHeaders as $locationHeader) {
+                $newLocation = $this->rewriteCrypt->encryptUrl($locationHeader, $this->request->getUri()->__toString());
+                $this->response = $this->response->withAddedHeader('location', $newLocation);
+            }
+        }
 
         if ($this->rewriters) {
             $this->filename = tempnam(sys_get_temp_dir(), 'rewrite_streamer_');
