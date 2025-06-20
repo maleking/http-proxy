@@ -49,7 +49,7 @@ class RewriteStreamer implements StreamInterface
         ini_set('output_handler', '');
         ini_set('zlib.output_compression', 0);
 
-        $this->request = $request;
+        $this->request = $this->rewriteCookie->onBeforeRequest($request);
 
         $clientConfig = [
             'verify' => false,
