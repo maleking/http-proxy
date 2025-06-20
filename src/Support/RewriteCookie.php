@@ -4,21 +4,23 @@ namespace Akrez\HttpProxy\Support;
 
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SetCookie;
+use GuzzleHttp\Psr7\ServerRequest;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class RewriteCookie
 {
-    public function __construct(public string $cookiePrefix) {}
+    public function __construct(
+        protected ServerRequest $serverRequest,
+        public string $cookiePrefix
+    ) {}
 
     public function onBeforeRequest(RequestInterface $request)
     {
         $cookieHeaders = $request->getHeader('cookie');
         $request = $request->withoutHeader('cookie');
         //
-        $domain = strval($request->getUri()->getHost());
-        //
-        $sendCookies = [];
+        $cookieJarArray = [];
         foreach ($cookieHeaders as $cookieHeader) {
             if (preg_match_all(
                 '@'.$this->cookiePrefix.'_(.+?)__(.+?)=([^;]+)@',
@@ -27,42 +29,41 @@ class RewriteCookie
                 PREG_SET_ORDER
             )) {
                 foreach ($matches as $match) {
-                    $cookieDomain = str_replace('_', '.', $match[1]);
-                    $cookieName = $match[2];
                     $cookieValue = $match[3];
-                    // what is the domain or our current URL?
-                    // does this cookie belong to this domain?
-                    // sometimes domain begins with a DOT indicating all subdomains - deprecated but still in use on some servers...
-                    if (strpos($domain, $cookieDomain) !== false) {
-                        $sendCookies[$cookieName] = $cookieValue;
-                    }
+                    $setCookieArray = json_decode(base64_url_decode($cookieValue), true);
+                    $cookieJarArray[] = new SetCookie($setCookieArray);
                 }
             }
         }
         //
-        if ($sendCookies) {
-            $request = CookieJar::fromArray($sendCookies, $domain)->withCookieHeader($request);
+        if ($cookieJarArray) {
+            $request = (new CookieJar(false, $cookieJarArray))->withCookieHeader($request);
         }
 
         return $request;
     }
 
-    // cookies received from a target server via set-cookie should be rewritten
     public function onHeadersReceived(RequestInterface $request, ResponseInterface $response)
     {
         $setCookieHeaders = $response->getHeader('set-cookie');
         if ($setCookieHeaders) {
             $response = $response->withoutHeader('set-cookie');
             foreach ($setCookieHeaders as $setCookieHeader) {
-                $setCookie = SetCookie::fromString($setCookieHeader);
-                $cookieName = sprintf(
+                $targetSetCookie = SetCookie::fromString($setCookieHeader);
+                $newSetCookieName = sprintf(
                     '%s_%s__%s',
                     $this->cookiePrefix,
                     str_replace('.', '_', strval($request->getUri()->getHost())),
-                    $setCookie->getName()
+                    $targetSetCookie->getName()
                 );
-                $setCookie->setName($cookieName);
-                $response = $response->withAddedHeader('set-cookie', $setCookie->__toString());
+
+                $newSetCookie = (clone $targetSetCookie);
+                $newSetCookie->setName($newSetCookieName);
+                $newSetCookie->setValue(base64_url_encode(json_encode($targetSetCookie->toArray())));
+                $newSetCookie->setDomain($this->serverRequest->getUri()->getHost());
+                $newSetCookie->setPath('/');
+
+                $response = $response->withAddedHeader('set-cookie', $newSetCookie->__toString());
             }
         }
 
