@@ -13,18 +13,18 @@ use GuzzleHttp\Psr7\ServerRequest;
 require_once './vendor/autoload.php';
 
 $serverRequest = ServerRequest::fromGlobals();
-$requestFactory = new RequestFactory($serverRequest);
-if ($requestFactory->isSuccessful()) {
+$requestFactory = RequestFactory::makeByServerRequest($serverRequest);
+if ($requestFactory) {
     if ($requestFactory->getState() === RequestFactory::STATE_DEBUG) {
-        $error = new Exception(nl2br(Message::toString($requestFactory->getRequest())));
+        $error = new Exception(nl2br(Message::toString($requestFactory->getNewServerRequest())));
     } elseif ($requestFactory->getState() === RequestFactory::STATE_SIMPLE) {
         $streamer = new SimpleStreamer('php://output', 'w+');
-        $error = $streamer->emit($requestFactory->getRequest());
+        $error = $streamer->emit($requestFactory->getNewServerRequest());
     } elseif ($requestFactory->getState() === RequestFactory::STATE_REWRITE) {
         $rewriteCrypt = new RewriteCrypt($serverRequest);
         $rewriteCookie = new RewriteCookie($serverRequest, 'PC');
         $streamer = new RewriteStreamer($rewriteCrypt, $rewriteCookie, 'php://output', 'w+');
-        $error = $streamer->emit($requestFactory->getRequest());
+        $error = $streamer->emit($requestFactory->getNewServerRequest());
     } else {
         $error = null;
     }
