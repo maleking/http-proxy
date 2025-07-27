@@ -4,7 +4,6 @@ namespace Akrez\HttpProxy;
 
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Uri;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class RequestFactory
@@ -15,20 +14,13 @@ class RequestFactory
 
     const STATE_REWRITE = 'rewrite';
 
-    protected bool $successful = false;
+    protected ?ServerRequestInterface $newServerRequest = null;
 
-    protected RequestInterface $request;
+    protected ?string $state = null;
 
-    protected ?string $state;
-
-    public function isSuccessful()
+    public function getNewServerRequest()
     {
-        return $this->successful;
-    }
-
-    public function getRequest()
-    {
-        return $this->request;
+        return $this->newServerRequest;
     }
 
     public function getState()
@@ -36,9 +28,9 @@ class RequestFactory
         return $this->state;
     }
 
-    public function __construct(ServerRequestInterface $serverRequest)
+    public static function makeByServerRequest(ServerRequestInterface $globalServerRequest)
     {
-        $serverParams = $serverRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
+        $serverParams = $globalServerRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
 
         $requestUri = $serverParams['REQUEST_URI'];
         $scriptNameSlash = $serverParams['SCRIPT_NAME'].'/';
@@ -49,62 +41,70 @@ class RequestFactory
         ) {
             $url = substr($requestUri, strlen($scriptNameSlash));
         } else {
-            return $this->successful = false;
-        }
-        $parts = explode('/', $url, 2) + [0 => null, 1 => null];
-
-        if (empty($parts[0]) || empty($parts[1])) {
-            return $this->successful = false;
+            return;
         }
 
-        $configs = static::sanitizeConfig($serverRequest, explode('_', $parts[0]));
+        [
+            0 => $configString,
+            1 => $hostPathString,
+        ] = explode('/', $url, 2) + [0 => null, 1 => null];
+        if (empty($configString) || empty($hostPathString)) {
+            return;
+        }
 
-        $newUrl = $configs['scheme'].'://'.$parts[1];
-
-        $newUri = new Uri($newUrl);
-
-        $this->request = static::cloneRequest($serverRequest, $newUri, $configs['method'], $configs['protocolVersion']);
-
-        $this->state = $configs['state'];
-
-        return $this->successful = true;
+        return new static($globalServerRequest, $configString, $hostPathString);
     }
 
-    protected static function cloneRequest(RequestInterface $serverRequest, Uri $newUri, ?string $method = null, ?string $protocolVersion = null)
+    public function __construct(ServerRequestInterface $globalServerRequest, string $configString, string $hostPathString)
     {
-        $newRequest = clone $serverRequest;
+        $sanitizedConfigs = static::sanitizeConfig($globalServerRequest, explode('_', $configString));
 
-        $newRequest = $newRequest->withUri($newUri);
+        $createdUri = static::createUri($globalServerRequest, $sanitizedConfigs, $hostPathString);
 
-        if ($method) {
-            $newRequest = $newRequest->withMethod($method);
+        $newServerRequest = clone $globalServerRequest;
+
+        $newServerRequest = $newServerRequest->withUri($createdUri);
+        if ($sanitizedConfigs['method']) {
+            $newServerRequest = $newServerRequest->withMethod($sanitizedConfigs['method']);
+        }
+        if ($sanitizedConfigs['protocolVersion']) {
+            $newServerRequest = $newServerRequest->withProtocolVersion(strval($sanitizedConfigs['protocolVersion']));
+        }
+        $newServerRequest = $newServerRequest->withoutHeader('referer');
+
+        $multipartBoundary = static::getMultipartBoundary($globalServerRequest);
+        if ($multipartBoundary) {
+            $newServerRequest = $newServerRequest->withBody(
+                static::getMultipartStream($multipartBoundary, $globalServerRequest)
+            );
         }
 
-        if ($protocolVersion) {
-            $newRequest = $newRequest->withProtocolVersion(strval($protocolVersion));
-        }
-
-        if ($multipartBoundary = static::getMultipartBoundary($serverRequest)) {
-            $multipartStream = static::getMultipartStream($multipartBoundary, $serverRequest);
-            $newRequest = $newRequest->withBody($multipartStream);
-        }
-
-        return $newRequest;
+        $this->newServerRequest = $newServerRequest;
+        $this->state = $sanitizedConfigs['state'];
     }
 
-    protected static function sanitizeConfig(RequestInterface $serverRequest, array $configs): array
+    protected static function sanitizeConfig(ServerRequestInterface $globalServerRequest, array $configs): array
     {
         return [
-            'state' => static::findInArray($configs, [static::STATE_SIMPLE, static::STATE_DEBUG, static::STATE_REWRITE], static::STATE_SIMPLE),
-            'method' => static::findInArray($configs, ['get', 'post', 'head', 'put', 'delete', 'options', 'trace', 'connect', 'patch'], $serverRequest->getMethod()),
-            'scheme' => static::findInArray($configs, ['https', 'http'], $serverRequest->getUri()->getScheme()),
-            'protocolVersion' => static::findInArray([10, 11, 20, 30], $configs, $serverRequest->getProtocolVersion() * 10) / 10.0,
+            'state' => static::findInArray($configs, [static::STATE_SIMPLE, static::STATE_DEBUG], static::STATE_SIMPLE),
+            'method' => static::findInArray($configs, ['get', 'post', 'head', 'put', 'delete', 'options', 'trace', 'connect', 'patch'], $globalServerRequest->getMethod()),
+            'scheme' => static::findInArray($configs, ['https', 'http'], $globalServerRequest->getUri()->getScheme()),
+            'protocolVersion' => static::findInArray([10, 11, 20, 30], $configs, $globalServerRequest->getProtocolVersion() * 10) / 10.0,
         ];
     }
 
-    protected static function getMultipartBoundary(RequestInterface $serverRequest): ?string
+    protected static function createUri(ServerRequestInterface $serverRequest, array $sanitizedConfigs, string $hostPathString)
     {
-        $contentType = $serverRequest->getHeaderLine('Content-Type');
+        $uri = new Uri($sanitizedConfigs['scheme'].'://'.$hostPathString);
+        $uri = $uri->withQuery($serverRequest->getUri()->getQuery());
+        $uri = $uri->withFragment($serverRequest->getUri()->getFragment());
+
+        return $uri;
+    }
+
+    protected static function getMultipartBoundary(ServerRequestInterface $globalServerRequest): ?string
+    {
+        $contentType = $globalServerRequest->getHeaderLine('Content-Type');
 
         if (
             strpos($contentType, 'multipart/form-data') === 0 and
@@ -116,18 +116,18 @@ class RequestFactory
         return null;
     }
 
-    protected static function getMultipartStream(string $multipartBoundary, ServerRequestInterface $serverRequest)
+    protected static function getMultipartStream(string $multipartBoundary, ServerRequestInterface $globalServerRequest)
     {
         $elements = [];
 
-        foreach ($serverRequest->getParsedBody() as $key => $value) {
+        foreach ($globalServerRequest->getParsedBody() as $key => $value) {
             $elements[] = [
                 'name' => $key,
                 'contents' => $value,
             ];
         }
 
-        foreach ($serverRequest->getUploadedFiles() as $key => $value) {
+        foreach ($globalServerRequest->getUploadedFiles() as $key => $value) {
             if (empty($value->getError())) {
                 $elements[] = [
                     'name' => $key,
