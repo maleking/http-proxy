@@ -69,8 +69,8 @@ class CurlSender
                 // 'content-length',
                 // 'content-encoding',
                 'transfer-encoding',
-                'keep-alive',
-                'connection',
+                // 'keep-alive',
+                // 'connection',
             ])) {
                 // do nothing
             } else {
