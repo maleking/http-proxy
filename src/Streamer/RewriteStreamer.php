@@ -14,6 +14,7 @@ use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Throwable;
 
@@ -25,7 +26,7 @@ class RewriteStreamer implements StreamInterface
 
     protected ?ResponseInterface $response = null;
 
-    private ?RequestInterface $request;
+    private ?ServerRequestInterface $newServerRequest;
 
     private ?StreamInterface $stream;
 
@@ -43,13 +44,13 @@ class RewriteStreamer implements StreamInterface
         return Utils::streamFor(Utils::tryFopen($this->filename, $this->mode));
     }
 
-    public function emit(RequestInterface $request, $timeout = null): null|Exception|Throwable
+    public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
     {
         ini_set('output_buffering', 'Off');
         ini_set('output_handler', '');
         ini_set('zlib.output_compression', 0);
 
-        $this->request = $this->rewriteCookie->onBeforeRequest($request);
+        $this->request = $this->rewriteCookie->onBeforeRequest($newServerRequest);
 
         $clientConfig = [
             'verify' => false,
@@ -70,7 +71,7 @@ class RewriteStreamer implements StreamInterface
 
         try {
             $client = new Client($clientConfig);
-            $client->send($request);
+            $client->send($newServerRequest);
             if ($this->rewriters) {
                 return $this->emitRewritedResponse();
             }

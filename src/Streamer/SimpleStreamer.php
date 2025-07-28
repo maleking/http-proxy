@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Throwable;
 
@@ -36,7 +37,7 @@ class SimpleStreamer implements StreamInterface
         return Utils::streamFor(Utils::tryFopen($this->filename, $this->mode));
     }
 
-    public function emit($request, $timeout = null): null|Exception|Throwable
+    public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
     {
         ini_set('output_buffering', 'Off');
         ini_set('output_handler', '');
@@ -62,7 +63,7 @@ class SimpleStreamer implements StreamInterface
         $client = new Client($clientConfig);
 
         try {
-            $client->send($request);
+            $client->send($newServerRequest);
         } catch (Throwable $e) {
             return $e;
         } catch (Exception $e) {

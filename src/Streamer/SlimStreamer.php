@@ -10,7 +10,7 @@ use Throwable;
 
 class SlimStreamer
 {
-    public function emit(ServerRequestInterface $newServerRequest, $timeout = null): null|Exception|Throwable
+    public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
     {
         if ($newServerRequest->hasHeader('Accept-Encoding')) {
             $newServerRequest = $newServerRequest
