@@ -2,12 +2,12 @@
 
 namespace Akrez\HttpProxy\Rewriters;
 
-use Akrez\HttpProxy\Streamer\RewriteStreamer;
+use Akrez\HttpProxy\Sender\RewriteSender;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class Rewriter
 {
-    public function __construct(protected RewriteStreamer $rewriteStreamer) {}
+    public function __construct(protected RewriteSender $rewriteSender) {}
 
     abstract public function convert($body, $mainPageUrl);
 
@@ -15,7 +15,7 @@ abstract class Rewriter
 
     public function encryptUrl(string $urlString, ?string $mainUrlString = null)
     {
-        return $this->rewriteStreamer->rewriteCrypt->encryptUrl($urlString, $mainUrlString);
+        return $this->rewriteSender->rewriteCrypt->encryptUrl($urlString, $mainUrlString);
     }
 
     public static function isContentType(string $contentType, ResponseInterface $response)

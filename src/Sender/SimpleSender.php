@@ -1,6 +1,6 @@
 <?php
 
-namespace Akrez\HttpProxy\Streamer;
+namespace Akrez\HttpProxy\Sender;
 
 use Akrez\HttpRunner\SapiEmitter;
 use Exception;
@@ -12,7 +12,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Throwable;
 
-class SimpleStreamer implements StreamInterface
+class SimpleSender implements StreamInterface
 {
     use StreamDecoratorTrait;
 

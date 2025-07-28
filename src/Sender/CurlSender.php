@@ -1,10 +1,10 @@
 <?php
 
-namespace Akrez\HttpProxy\Streamer;
+namespace Akrez\HttpProxy\Sender;
 
 use Psr\Http\Message\ServerRequestInterface;
 
-class CurlStreamer
+class CurlSender
 {
     public $bufferSize = 128;
 

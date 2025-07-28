@@ -1,6 +1,6 @@
 <?php
 
-namespace Akrez\HttpProxy\Streamer;
+namespace Akrez\HttpProxy\Sender;
 
 use Akrez\HttpProxy\Rewriters\TextCssRewriter;
 use Akrez\HttpProxy\Rewriters\TextHtmlRewriter;
@@ -17,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Throwable;
 
-class RewriteStreamer implements StreamInterface
+class RewriteSender implements StreamInterface
 {
     use StreamDecoratorTrait;
 

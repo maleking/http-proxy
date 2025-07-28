@@ -1,21 +1,21 @@
 <?php
 
-namespace Akrez\HttpProxy\Streamer;
+namespace Akrez\HttpProxy\Sender;
 
-use Akrez\HttpProxy\Emitters\YiiEmitter;
+use Akrez\HttpProxy\Emitters\SlimEmitter;
 use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 
-class YiiStreamer
+class SlimSender
 {
     public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
     {
         if ($newServerRequest->hasHeader('Accept-Encoding')) {
             $newServerRequest = $newServerRequest
                 ->withoutHeader('Accept-Encoding')
-                ->withHeader('Accept-Encoding', 'gzip');
+                ->withHeader('Accept-Encoding', 'identity');
         }
         $newServerRequest = $newServerRequest->withoutHeader('referer');
 
@@ -23,7 +23,6 @@ class YiiStreamer
             'verify' => false,
             'allow_redirects' => false,
             'referer' => false,
-            'decode_content' => false,
             'http_errors' => false,
         ];
         if ($timeout !== null) {
@@ -44,13 +43,13 @@ class YiiStreamer
                 ->withoutHeader('Content-Encoding')
                 ->withoutHeader('Keep-Alive')
                 ->withoutHeader('Transfer-Encoding');
+            (new SlimEmitter)->emit($response);
+        } catch (Throwable $e) {
+            return $e;
         } catch (Exception $e) {
-            $response = new Response(500, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
-                'host' => gethostname(),
-                'message' => $e->getMessage(),
-            ]));
+            return $e;
         }
 
-        (new YiiEmitter)->emit($response);
+        return null;
     }
 }
