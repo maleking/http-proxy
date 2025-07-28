@@ -2,14 +2,15 @@
 
 namespace Akrez\HttpProxy\Streamer;
 
+use Akrez\HttpProxy\Emitters\YiiEmitter;
 use Exception;
 use GuzzleHttp\Client;
-use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ServerRequestInterface;
 
-class SimpleStreamer
+class YiiStreamer
 {
-    public function emit(ServerRequestInterface $newServerRequest, $timeout = null): ResponseInterface|Exception
+    public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
     {
         if ($newServerRequest->hasHeader('Accept-Encoding')) {
             $newServerRequest = $newServerRequest
@@ -37,15 +38,19 @@ class SimpleStreamer
 
         try {
             $response = $client->send($newServerRequest);
-
-            return $response
+            $response = $response
                 // ->withoutHeader('Content-Length')
                 ->withoutHeader('Connection')
                 ->withoutHeader('Content-Encoding')
                 ->withoutHeader('Keep-Alive')
                 ->withoutHeader('Transfer-Encoding');
         } catch (Exception $e) {
-            return $e;
+            $response = new Response(500, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+                'host' => gethostname(),
+                'message' => $e->getMessage(),
+            ]));
         }
+
+        (new YiiEmitter)->emit($response);
     }
 }
