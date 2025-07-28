@@ -2,24 +2,21 @@
 
 namespace Akrez\HttpProxy\Streamer;
 
-use Akrez\HttpRunner\SapiEmitter;
 use Exception;
 use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Throwable;
 
 class SimpleStreamer
 {
-    public function __construct(string $filename, string $mode) {}
-
-    public function emit(ServerRequestInterface $request, $timeout = null): null|Exception|Throwable
+    public function emit(ServerRequestInterface $newServerRequest, $timeout = null): ResponseInterface|Exception
     {
-        $acceptEncoding = $request->getHeaderLine('Accept-Encoding');
-        if ($acceptEncoding) {
-            $request = $request
+        if ($newServerRequest->hasHeader('Accept-Encoding')) {
+            $newServerRequest = $newServerRequest
                 ->withoutHeader('Accept-Encoding')
                 ->withHeader('Accept-Encoding', 'gzip');
         }
+        $newServerRequest = $newServerRequest->withoutHeader('referer');
 
         $clientConfig = [
             'verify' => false,
@@ -39,19 +36,16 @@ class SimpleStreamer
         $client = new Client($clientConfig);
 
         try {
-            $response = $client->send($request);
-            $response = $response
+            $response = $client->send($newServerRequest);
+
+            return $response
                 // ->withoutHeader('Content-Length')
                 ->withoutHeader('Connection')
+                ->withoutHeader('Content-Encoding')
                 ->withoutHeader('Keep-Alive')
                 ->withoutHeader('Transfer-Encoding');
-            (new SapiEmitter)->emit($response);
-        } catch (Throwable $e) {
-            return $e;
         } catch (Exception $e) {
             return $e;
         }
-
-        return null;
     }
 }
