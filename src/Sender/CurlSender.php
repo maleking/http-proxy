@@ -10,10 +10,9 @@ class CurlSender
 
     public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
     {
-        if ($newServerRequest->hasHeader('Accept-Encoding')) {
-            $newServerRequest = $newServerRequest->withoutHeader('Accept-Encoding')
-                ->withHeader('Accept-Encoding', 'identity');
-        }
+        $newServerRequest = $newServerRequest
+            ->withoutHeader('Accept-Encoding')
+            ->withHeader('Accept-Encoding', 'identity');
         $newServerRequest = $newServerRequest->withoutHeader('referer');
 
         $url = (string) $newServerRequest->getUri();
@@ -68,7 +67,7 @@ class CurlSender
             if (in_array(strtolower($parts[0]), [
                 // 'content-length',
                 // 'content-encoding',
-                'transfer-encoding',
+                // 'transfer-encoding',
                 // 'keep-alive',
                 // 'connection',
             ])) {
