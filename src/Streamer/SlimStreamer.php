@@ -43,7 +43,7 @@ class SlimStreamer
                 ->withoutHeader('Content-Encoding')
                 ->withoutHeader('Keep-Alive')
                 ->withoutHeader('Transfer-Encoding');
-            (new SlimEmitter())->emit($response);
+            (new SlimEmitter)->emit($response);
         } catch (Throwable $e) {
             return $e;
         } catch (Exception $e) {

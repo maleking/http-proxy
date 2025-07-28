@@ -12,7 +12,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use GuzzleHttp\Psr7\Utils;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
@@ -50,7 +49,7 @@ class RewriteStreamer implements StreamInterface
         ini_set('output_handler', '');
         ini_set('zlib.output_compression', 0);
 
-        $this->request = $this->rewriteCookie->onBeforeRequest($newServerRequest);
+        $this->newServerRequest = $this->rewriteCookie->onBeforeRequest($newServerRequest);
 
         $clientConfig = [
             'verify' => false,
@@ -90,13 +89,13 @@ class RewriteStreamer implements StreamInterface
 
         $this->rewriters = $this->detectRewriters($response);
 
-        $this->response = $this->rewriteCookie->onHeadersReceived($this->request, $this->response);
-        
+        $this->response = $this->rewriteCookie->onHeadersReceived($this->newServerRequest, $this->response);
+
         $locationHeaders = $response->getHeader('location');
         if ($locationHeaders) {
             $this->response = $this->response->withoutHeader('location');
             foreach ($locationHeaders as $locationHeader) {
-                $newLocation = $this->rewriteCrypt->encryptUrl($locationHeader, $this->request->getUri()->__toString());
+                $newLocation = $this->rewriteCrypt->encryptUrl($locationHeader, $this->newServerRequest->getUri()->__toString());
                 $this->response = $this->response->withAddedHeader('location', $newLocation);
             }
         }
@@ -123,7 +122,7 @@ class RewriteStreamer implements StreamInterface
         $this->response = $this->response->withoutHeader('transfer-encoding');
 
         foreach ($this->rewriters as $rewriter) {
-            $contents = $rewriter->convert($contents, $this->request->getUri()->__toString());
+            $contents = $rewriter->convert($contents, $this->newServerRequest->getUri()->__toString());
         }
 
         $response = $this->cloneResponse($this->response, $contents);

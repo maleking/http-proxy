@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Akrez\HttpProxy\Emitters;
 
+use const CONNECTION_NORMAL;
+
 use Psr\Http\Message\ResponseInterface;
 
 use function connection_status;
@@ -20,8 +22,6 @@ use function min;
 use function sprintf;
 use function strlen;
 use function strtolower;
-
-use const CONNECTION_NORMAL;
 
 class SlimEmitter
 {
@@ -47,7 +47,7 @@ class SlimEmitter
             $this->emitStatusLine($response);
         }
 
-        if (!$isEmpty) {
+        if (! $isEmpty) {
             $this->emitBody($response);
         }
     }
@@ -92,12 +92,12 @@ class SlimEmitter
         }
 
         $amountToRead = (int) $response->getHeaderLine('Content-Length');
-        if (!$amountToRead) {
+        if (! $amountToRead) {
             $amountToRead = $body->getSize();
         }
 
         if ($amountToRead) {
-            while ($amountToRead > 0 && !$body->eof()) {
+            while ($amountToRead > 0 && ! $body->eof()) {
                 $length = min($this->responseChunkSize, $amountToRead);
                 $data = $body->read($length);
                 echo $data;
@@ -109,7 +109,7 @@ class SlimEmitter
                 }
             }
         } else {
-            while (!$body->eof()) {
+            while (! $body->eof()) {
                 echo $body->read($this->responseChunkSize);
                 if (connection_status() !== CONNECTION_NORMAL) {
                     break;
@@ -131,6 +131,7 @@ class SlimEmitter
         if ($seekable) {
             $stream->rewind();
         }
+
         return $seekable ? $stream->read(1) === '' : $stream->eof();
     }
 }
