@@ -28,7 +28,7 @@ class RequestFactory
         return $this->state;
     }
 
-    public static function makeByServerRequest(ServerRequestInterface $globalServerRequest)
+    public static function makeByServerRequest(ServerRequestInterface $globalServerRequest): ?static
     {
         $serverParams = $globalServerRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
 
@@ -41,7 +41,7 @@ class RequestFactory
         ) {
             $url = substr($requestUri, strlen($scriptNameSlash));
         } else {
-            return;
+            return null;
         }
 
         [
@@ -49,7 +49,7 @@ class RequestFactory
             1 => $hostPathString,
         ] = explode('/', $url, 2) + [0 => null, 1 => null];
         if (empty($configString) || empty($hostPathString)) {
-            return;
+            return null;
         }
 
         return new static($globalServerRequest, $configString, $hostPathString);
