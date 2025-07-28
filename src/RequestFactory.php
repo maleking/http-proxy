@@ -86,7 +86,7 @@ class RequestFactory
     protected static function sanitizeConfig(ServerRequestInterface $globalServerRequest, array $configs): array
     {
         return [
-            'state' => static::findInArray($configs, [static::STATE_SIMPLE, static::STATE_DEBUG], static::STATE_SIMPLE),
+            'state' => static::findInArray($configs, [static::STATE_SIMPLE, static::STATE_DEBUG, static::STATE_REWRITE], static::STATE_SIMPLE),
             'method' => static::findInArray($configs, ['get', 'post', 'head', 'put', 'delete', 'options', 'trace', 'connect', 'patch'], $globalServerRequest->getMethod()),
             'scheme' => static::findInArray($configs, ['https', 'http'], $globalServerRequest->getUri()->getScheme()),
             'protocolVersion' => static::findInArray([10, 11, 20, 30], $configs, $globalServerRequest->getProtocolVersion() * 10) / 10.0,
