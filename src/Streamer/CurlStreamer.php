@@ -48,22 +48,26 @@ class CurlStreamer
             CURLOPT_CUSTOMREQUEST => $newServerRequest->getMethod(),
             CURLOPT_POSTFIELDS => (string) $newServerRequest->getBody(),
             CURLOPT_HTTPHEADER => $headers,
+
+            // CURLOPT_HTTP_CONTENT_DECODING => false,
         ];
 
         $ch = curl_init();
         curl_setopt_array($ch, $options);
-        @curl_exec($ch);
+        curl_exec($ch);
         curl_close($ch);
 
         return true;
     }
 
-    private function headerCallback($ch, $headers)
+    protected function headerCallback($ch, $headers)
     {
         $parts = explode(':', $headers, 2);
 
         if (count($parts) == 2) {
-            if (in_array($parts[0], [
+            if (in_array(strtolower($parts[0]), [
+                // 'content-length',
+                // 'content-encoding',
                 'transfer-encoding',
                 'keep-alive',
                 'connection',
@@ -79,7 +83,7 @@ class CurlStreamer
         return strlen($headers);
     }
 
-    private function writeCallback($ch, $str)
+    protected function writeCallback($ch, $str)
     {
         $len = strlen($str);
 
