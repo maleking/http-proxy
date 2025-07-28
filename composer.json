@@ -1,18 +1,9 @@
 {
-    "name": "akrez/http-proxy",
-    "type": "library",
-    "description": "Akrez http proxy",
-    "keywords": [
-        "akrez",
-        "proxy",
-        "http",
-        "agent"
-    ],
     "require": {
         "php": "^8.1",
         "guzzlehttp/guzzle": "*",
         "akrez/http-runner": "*",
-        "league/uri": "^7.5"
+        "league/uri": "*"
     },
     "require-dev": {
         "symfony/var-dumper": "*"
@@ -25,12 +16,12 @@
     "config": {
         "platform": {
             "php": "8.1"
-        }
+        },
+        "sort-packages": true
     },
     "authors": [
         {
-            "name": "Akrez",
-            "email": "akrez.like@gmail.com"
+            "name": "Akrez"
         }
     ]
 }
