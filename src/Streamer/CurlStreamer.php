@@ -16,6 +16,13 @@ class CurlStreamer
         }
         $newServerRequest = $newServerRequest->withoutHeader('referer');
 
+        $url = (string) $newServerRequest->getUri();
+
+        $headers = [];
+        foreach ($newServerRequest->getHeaders() as $name => $values) {
+            $headers[] = $name.': '.implode(', ', $values);
+        }
+
         $options = [
             CURLOPT_CONNECTTIMEOUT => $timeout,
             CURLOPT_TIMEOUT => $timeout,
@@ -29,24 +36,19 @@ class CurlStreamer
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_AUTOREFERER => false,
 
-            CURLOPT_HEADERFUNCTION => [$this, 'headerFunction'],
-            CURLOPT_WRITEFUNCTION => [$this, 'writeFunction'],
+            CURLOPT_HEADERFUNCTION => [$this, 'headerCallback'],
+            CURLOPT_WRITEFUNCTION => [$this, 'writeCallback'],
 
             CURLOPT_FORBID_REUSE => true,
             CURLOPT_FRESH_CONNECT => true,
 
-            CURLOPT_BUFFERSIZE=> $this->bufferSize,
+            CURLOPT_BUFFERSIZE => $this->bufferSize,
 
-            CURLOPT_URL => (string) $newServerRequest->getUri(),
+            CURLOPT_URL => $url,
             CURLOPT_CUSTOMREQUEST => $newServerRequest->getMethod(),
             CURLOPT_POSTFIELDS => (string) $newServerRequest->getBody(),
+            CURLOPT_HTTPHEADER => $headers,
         ];
-
-        $headers = [];
-        foreach ($newServerRequest->getHeaders() as $name => $values) {
-            $headers[] = $name.': '.implode(', ', $values);
-        }
-        $options[CURLOPT_HTTPHEADER] = $headers;
 
         $ch = curl_init();
         curl_setopt_array($ch, $options);
@@ -56,23 +58,28 @@ class CurlStreamer
         return true;
     }
 
-    private function headerFunction($ch, $headers)
+    private function headerCallback($ch, $headers)
     {
         $parts = explode(':', $headers, 2);
 
-        if ((count($parts) == 2) && in_array($parts[0], [
-            'content-length',
-            'transfer-encoding',
-        ])) {
-            // do nothing
-        } else {
-            header($headers);
+        if (count($parts) == 2) {
+            if (in_array($parts[0], [
+                'transfer-encoding',
+                'keep-alive',
+                'connection',
+            ])) {
+                // do nothing
+            } else {
+                header($headers, false);
+            }
+        } elseif (preg_match('/HTTP\/[\d.]+\s*(\d+)/', $headers, $matches)) {
+            http_response_code($matches[1]);
         }
 
         return strlen($headers);
     }
 
-    private function writeFunction($ch, $str)
+    private function writeCallback($ch, $str)
     {
         $len = strlen($str);
 
