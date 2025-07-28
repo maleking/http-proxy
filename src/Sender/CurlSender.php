@@ -49,7 +49,7 @@ class CurlSender
             CURLOPT_POSTFIELDS => (string) $newServerRequest->getBody(),
             CURLOPT_HTTPHEADER => $headers,
 
-            // CURLOPT_HTTP_CONTENT_DECODING => false,
+            CURLOPT_HTTP_CONTENT_DECODING => false,
         ];
 
         $ch = curl_init();
