@@ -1,4 +1,13 @@
 {
+    "name": "akrez/http-proxy",
+    "type": "library",
+    "description": "Akrez http proxy",
+    "keywords": [
+        "akrez",
+        "proxy",
+        "http",
+        "agent"
+    ],
     "require": {
         "php": "^8.1",
         "guzzlehttp/guzzle": "*",
@@ -21,7 +30,8 @@
     },
     "authors": [
         {
-            "name": "Akrez"
+            "name": "Akrez",
+            "email": "akrez.like@gmail.com"
         }
     ]
 }
