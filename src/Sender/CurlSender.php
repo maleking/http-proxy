@@ -13,7 +13,6 @@ class CurlSender
         $newServerRequest = $newServerRequest
             ->withoutHeader('Accept-Encoding')
             ->withHeader('Accept-Encoding', 'identity');
-        $newServerRequest = $newServerRequest->withoutHeader('referer');
 
         $url = (string) $newServerRequest->getUri();
 
