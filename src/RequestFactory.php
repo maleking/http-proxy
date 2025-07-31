@@ -70,7 +70,6 @@ class RequestFactory
         if ($sanitizedConfigs['protocolVersion']) {
             $newServerRequest = $newServerRequest->withProtocolVersion(strval($sanitizedConfigs['protocolVersion']));
         }
-        $newServerRequest = $newServerRequest->withoutHeader('referer');
 
         $multipartBoundary = static::getMultipartBoundary($globalServerRequest);
         if ($multipartBoundary) {
