@@ -9,7 +9,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 require_once './../agent.core/vendor/autoload.php';
 
 $serverRequest = ServerRequest::fromGlobals();
-$requestFactory = RequestFactory::makeByServerRequest($serverRequest);
+$requestFactory = RequestFactory::fromServerRequest($serverRequest);
 if ($requestFactory) {
     $rewriteCrypt = new RewriteCrypt($serverRequest);
     $rewriteCookie = new RewriteCookie($serverRequest, 'PC');
