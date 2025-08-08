@@ -9,6 +9,6 @@ class DebugSender
 {
     public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
     {
-        exit(nl2br(Message::toString($newServerRequest)));
+        echo nl2br(Message::toString($newServerRequest));
     }
 }
