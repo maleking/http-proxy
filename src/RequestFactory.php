@@ -5,30 +5,18 @@ namespace Akrez\HttpProxy;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 
 class RequestFactory
 {
-    const STATE_SIMPLE = 'simple';
-
-    const STATE_DEBUG = 'debug';
-
-    const STATE_REWRITE = 'rewrite';
-
     protected ?ServerRequestInterface $newServerRequest = null;
-
-    protected ?string $state = null;
 
     public function getNewServerRequest()
     {
         return $this->newServerRequest;
     }
 
-    public function getState()
-    {
-        return $this->state;
-    }
-
-    public static function makeByServerRequest(ServerRequestInterface $globalServerRequest): ?static
+    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?static
     {
         $serverParams = $globalServerRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
 
@@ -52,23 +40,32 @@ class RequestFactory
             return null;
         }
 
-        return new static($globalServerRequest, $configString, $hostPathString);
-    }
-
-    public function __construct(ServerRequestInterface $globalServerRequest, string $configString, string $hostPathString)
-    {
         $sanitizedConfigs = static::sanitizeConfig($globalServerRequest, explode('_', $configString));
 
-        $createdUri = static::createUri($globalServerRequest, $sanitizedConfigs, $hostPathString);
+        $newUri = static::createUri($globalServerRequest, $sanitizedConfigs, $hostPathString);
 
+        return new static(
+            $globalServerRequest,
+            $newUri,
+            $sanitizedConfigs['method'],
+            $sanitizedConfigs['protocolVersion']
+        );
+    }
+
+    public function __construct(
+        ServerRequestInterface $globalServerRequest,
+        UriInterface $newUri,
+        ?string $method,
+        ?string $protocolVersion
+    ) {
         $newServerRequest = clone $globalServerRequest;
 
-        $newServerRequest = $newServerRequest->withUri($createdUri);
-        if ($sanitizedConfigs['method']) {
-            $newServerRequest = $newServerRequest->withMethod($sanitizedConfigs['method']);
+        $newServerRequest = $newServerRequest->withUri($newUri);
+        if ($method) {
+            $newServerRequest = $newServerRequest->withMethod($method);
         }
-        if ($sanitizedConfigs['protocolVersion']) {
-            $newServerRequest = $newServerRequest->withProtocolVersion(strval($sanitizedConfigs['protocolVersion']));
+        if ($protocolVersion) {
+            $newServerRequest = $newServerRequest->withProtocolVersion(strval($protocolVersion));
         }
 
         $multipartBoundary = static::getMultipartBoundary($globalServerRequest);
@@ -79,13 +76,11 @@ class RequestFactory
         }
 
         $this->newServerRequest = $newServerRequest;
-        $this->state = $sanitizedConfigs['state'];
     }
 
     protected static function sanitizeConfig(ServerRequestInterface $globalServerRequest, array $configs): array
     {
         return [
-            'state' => static::findInArray($configs, [static::STATE_SIMPLE, static::STATE_DEBUG, static::STATE_REWRITE], static::STATE_SIMPLE),
             'method' => static::findInArray($configs, ['get', 'post', 'head', 'put', 'delete', 'options', 'trace', 'connect', 'patch'], $globalServerRequest->getMethod()),
             'scheme' => static::findInArray($configs, ['https', 'http'], $globalServerRequest->getUri()->getScheme()),
             'protocolVersion' => static::findInArray([10, 11, 20, 30], $configs, $globalServerRequest->getProtocolVersion() * 10) / 10.0,
