@@ -9,14 +9,7 @@ use Psr\Http\Message\UriInterface;
 
 class RequestFactory
 {
-    protected ?ServerRequestInterface $newServerRequest = null;
-
-    public function getNewServerRequest()
-    {
-        return $this->newServerRequest;
-    }
-
-    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?static
+    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?ServerRequestInterface
     {
         $serverParams = $globalServerRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
 
@@ -44,7 +37,7 @@ class RequestFactory
 
         $newUri = static::createUri($globalServerRequest, $sanitizedConfigs, $hostPathString);
 
-        return new static(
+        return static::toNewServerRequest(
             $globalServerRequest,
             $newUri,
             $sanitizedConfigs['method'],
@@ -52,7 +45,7 @@ class RequestFactory
         );
     }
 
-    public function __construct(
+    protected static function toNewServerRequest(
         ServerRequestInterface $globalServerRequest,
         UriInterface $newUri,
         ?string $method,
@@ -75,7 +68,7 @@ class RequestFactory
             );
         }
 
-        $this->newServerRequest = $newServerRequest;
+        return $newServerRequest;
     }
 
     protected static function sanitizeConfig(ServerRequestInterface $globalServerRequest, array $configs): array

@@ -7,7 +7,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 require_once '../vendor/autoload.php';
 
 $serverRequest = ServerRequest::fromGlobals();
-$requestFactory = RequestFactory::fromServerRequest($serverRequest);
-if ($requestFactory) {
-    (new CurlSender)->emit($requestFactory->getNewServerRequest());
+$newServerRequest = RequestFactory::fromServerRequest($serverRequest);
+if ($newServerRequest) {
+    (new CurlSender)->emit($newServerRequest);
 }
