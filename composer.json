@@ -5,8 +5,7 @@
     "keywords": [
         "akrez",
         "proxy",
-        "http",
-        "agent"
+        "http"
     ],
     "require": {
         "php": "^8.1",

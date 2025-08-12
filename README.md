@@ -1,11 +1,11 @@
 <p align="center">
-    <h1 align="center">Akrez HTTP Proxy Agent</h1>
+    <h1 align="center">Akrez HTTP Proxy</h1>
     <br>
 </p>
 
 ## Requirements
 
-- PHP 8.0 or higher.
+- PHP 8.1 or higher.
 
 ## Installation
 

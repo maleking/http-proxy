@@ -17,8 +17,8 @@ def request(flow: HTTPFlow):
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    new_uri         = urlparse(config['agent']['url'])
-    new_host_header = config['agent'].get('host_header', '').strip() or new_uri.hostname
+    new_uri         = urlparse(config['proxy']['url'])
+    new_host_header = config['proxy'].get('host_header', '').strip() or new_uri.hostname
 
     new_scheme       = new_uri.scheme
     new_port         = new_uri.port if new_uri.port else 443 if new_scheme == "https" else 80 
