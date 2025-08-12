@@ -40,25 +40,20 @@ class RequestFactory
         return static::toNewServerRequest(
             $globalServerRequest,
             $newUri,
-            $sanitizedConfigs['method'],
-            $sanitizedConfigs['protocolVersion']
+            $sanitizedConfigs['method']
         );
     }
 
     protected static function toNewServerRequest(
         ServerRequestInterface $globalServerRequest,
         UriInterface $newUri,
-        ?string $method,
-        ?string $protocolVersion
+        ?string $method
     ) {
         $newServerRequest = clone $globalServerRequest;
 
         $newServerRequest = $newServerRequest->withUri($newUri);
         if ($method) {
             $newServerRequest = $newServerRequest->withMethod($method);
-        }
-        if ($protocolVersion) {
-            $newServerRequest = $newServerRequest->withProtocolVersion(strval($protocolVersion));
         }
 
         $multipartBoundary = static::getMultipartBoundary($globalServerRequest);
@@ -76,7 +71,6 @@ class RequestFactory
         return [
             'method' => static::findInArray($configs, ['get', 'post', 'head', 'put', 'delete', 'options', 'trace', 'connect', 'patch'], $globalServerRequest->getMethod()),
             'scheme' => static::findInArray($configs, ['https', 'http'], $globalServerRequest->getUri()->getScheme()),
-            'protocolVersion' => static::findInArray([10, 11, 20, 30], $configs, $globalServerRequest->getProtocolVersion() * 10) / 10.0,
         ];
     }
 
