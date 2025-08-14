@@ -3,14 +3,12 @@
 namespace Akrez\HttpProxy\Factories;
 
 use GuzzleHttp\Psr7\Message;
-use GuzzleHttp\Psr7\MultipartStream;
-use GuzzleHttp\Psr7\Uri;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 
 class InBodyFactory
 {
-    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?ServerRequestInterface
+    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?RequestInterface
     {
         return Message::parseRequest((string) $globalServerRequest->getBody());
     }

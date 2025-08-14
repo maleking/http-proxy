@@ -23,6 +23,7 @@ def request(flow: HTTPFlow):
     new_scheme       = new_uri.scheme
     new_port         = new_uri.port if new_uri.port else 443 if new_scheme == "https" else 80 
     old_host         = flow.request.host
+    new_body         = assemble_request(flow.request)
 
     flow.request.headers.clear()
 
@@ -32,7 +33,7 @@ def request(flow: HTTPFlow):
     flow.request.host            = new_uri.hostname
     flow.request.port            = new_port
     flow.request.headers["host"] = new_host_header
-    flow.request.raw_content     = assemble_request(flow.request)
+    flow.request.set_content(new_body)
 
     print("["+strftime("%H:%M:%S", gmtime()) + "] " + flow.request.method.ljust(8, ' ') + old_host)
 
