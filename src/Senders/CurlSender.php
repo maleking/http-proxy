@@ -8,10 +8,6 @@ class CurlSender extends Sender
 {
     public function emitRequest(RequestInterface $newRequest)
     {
-        $newRequest = $newRequest
-            ->withoutHeader('Accept-Encoding')
-            ->withHeader('Accept-Encoding', 'identity');
-
         $url = (string) $newRequest->getUri();
 
         $headers = [];

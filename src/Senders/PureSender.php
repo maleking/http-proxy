@@ -9,10 +9,6 @@ class PureSender extends Sender
 {
     public function emitRequest(RequestInterface $newRequest)
     {
-        $newRequest = $newRequest
-            ->withoutHeader('Accept-Encoding')
-            ->withHeader('Accept-Encoding', 'identity');
-
         $clientConfig = [
             'verify' => false,
             'allow_redirects' => false,

@@ -50,8 +50,17 @@ abstract class Sender implements SenderInterface
         return $this->debug;
     }
 
+    public function beforeSend(RequestInterface $newRequest)
+    {
+        return $newRequest
+            ->withoutHeader('Accept-Encoding')
+            ->withHeader('Accept-Encoding', 'identity');
+    }
+
     public function emit(RequestInterface $newRequest)
     {
+        $newRequest = $this->beforeSend($newRequest);
+
         if ($this->getDebug()) {
             $this->emitDebug($newRequest);
 
