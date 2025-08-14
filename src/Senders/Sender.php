@@ -14,9 +14,11 @@ abstract class Sender implements SenderInterface
 
     protected bool $debug = false;
 
-    public function setTimeout(?int $timeout)
+    public function setTimeout(?int $timeout): self
     {
         $this->timeout = $timeout;
+
+        return $this;
     }
 
     public function getTimeout(): ?int
@@ -24,9 +26,11 @@ abstract class Sender implements SenderInterface
         return $this->timeout;
     }
 
-    public function setBufferSize(?int $bufferSize)
+    public function setBufferSize(?int $bufferSize): self
     {
         $this->bufferSize = $bufferSize;
+
+        return $this;
     }
 
     public function getBufferSize(): ?int
@@ -34,9 +38,11 @@ abstract class Sender implements SenderInterface
         return $this->bufferSize;
     }
 
-    public function setDebug(bool $debug)
+    public function setDebug(bool $debug): self
     {
         $this->debug = $debug;
+
+        return $this;
     }
 
     public function getDebug(): bool
@@ -48,11 +54,19 @@ abstract class Sender implements SenderInterface
     {
         if ($this->getDebug()) {
             $this->emitDebug($newRequest);
-        } elseif ($newRequest->getMethod() === 'CONNECT') {
-            $this->emitConnect($newRequest);
-        } else {
-            $this->emitRequest($newRequest);
+
+            return 'debug';
         }
+
+        if ($newRequest->getMethod() === 'CONNECT') {
+            $this->emitConnect($newRequest);
+
+            return 'connect';
+        }
+
+        $this->emitRequest($newRequest);
+
+        return 'request';
     }
 
     public function emitDebug(RequestInterface $newRequest)
