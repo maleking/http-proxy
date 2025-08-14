@@ -2,13 +2,13 @@
 
 namespace Akrez\HttpProxy\Senders;
 
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\RequestInterface;
 
 class CurlSender
 {
     public $bufferSize = 128;
 
-    public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
+    public function emit(RequestInterface $newServerRequest, $timeout = null)
     {
         $newServerRequest = $newServerRequest
             ->withoutHeader('Accept-Encoding')

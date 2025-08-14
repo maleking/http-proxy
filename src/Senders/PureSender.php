@@ -3,13 +3,13 @@
 namespace Akrez\HttpProxy\Senders;
 
 use GuzzleHttp\Client;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\RequestInterface;
 
 class PureSender
 {
     public $bufferSize = 128;
 
-    public function emit(ServerRequestInterface $newServerRequest, $timeout = null)
+    public function emit(RequestInterface $newServerRequest, $timeout = null)
     {
         $newServerRequest = $newServerRequest
             ->withoutHeader('Accept-Encoding')
