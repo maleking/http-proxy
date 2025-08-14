@@ -1,3 +1,3 @@
-[proxy]
-url=https://proxy.com/curl.php
-; host_header=proxy.com
+[inline]
+url=https://inline.com/curl.php
+; host_header=inline.com

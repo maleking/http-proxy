@@ -1,15 +1,16 @@
 <?php
 
-namespace Akrez\HttpProxy;
+namespace Akrez\HttpProxy\Factories;
 
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Uri;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
-class RequestFactory
+class InLineFactory
 {
-    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?ServerRequestInterface
+    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?RequestInterface
     {
         $serverParams = $globalServerRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
 
