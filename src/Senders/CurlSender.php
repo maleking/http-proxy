@@ -2,16 +2,11 @@
 
 namespace Akrez\HttpProxy\Senders;
 
-use Akrez\HttpProxy\Interfaces\SenderInterface;
 use Psr\Http\Message\RequestInterface;
 
-class CurlSender implements SenderInterface
+class CurlSender extends Sender
 {
-    public $timeout = null;
-
-    public $bufferSize = 128;
-
-    public function emit(RequestInterface $newRequest)
+    public function emitRequest(RequestInterface $newRequest)
     {
         $newRequest = $newRequest
             ->withoutHeader('Accept-Encoding')
@@ -25,8 +20,8 @@ class CurlSender implements SenderInterface
         }
 
         $options = [
-            CURLOPT_CONNECTTIMEOUT => $this->timeout,
-            CURLOPT_TIMEOUT => $this->timeout,
+            CURLOPT_CONNECTTIMEOUT => $this->getTimeout(),
+            CURLOPT_TIMEOUT => $this->getTimeout(),
 
             CURLOPT_RETURNTRANSFER => false,
             CURLOPT_HEADER => false,
@@ -43,7 +38,7 @@ class CurlSender implements SenderInterface
             CURLOPT_FORBID_REUSE => true,
             CURLOPT_FRESH_CONNECT => true,
 
-            CURLOPT_BUFFERSIZE => $this->bufferSize,
+            CURLOPT_BUFFERSIZE => $this->getBufferSize(),
 
             CURLOPT_URL => $url,
             CURLOPT_CUSTOMREQUEST => $newRequest->getMethod(),

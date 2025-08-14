@@ -2,17 +2,12 @@
 
 namespace Akrez\HttpProxy\Senders;
 
-use Akrez\HttpProxy\Interfaces\SenderInterface;
 use GuzzleHttp\Client;
 use Psr\Http\Message\RequestInterface;
 
-class PureSender implements SenderInterface
+class PureSender extends Sender
 {
-    public $timeout = null;
-
-    public $bufferSize = 128;
-
-    public function emit(RequestInterface $newRequest)
+    public function emitRequest(RequestInterface $newRequest)
     {
         $newRequest = $newRequest
             ->withoutHeader('Accept-Encoding')
@@ -25,11 +20,11 @@ class PureSender implements SenderInterface
             'decode_content' => false,
             'http_errors' => false,
         ];
-        if ($this->timeout !== null) {
+        if ($this->getTimeout() !== null) {
             $clientConfig += [
-                'timeout' => $this->timeout,
-                'connect_timeout' => $this->timeout,
-                'read_timeout' => $this->timeout,
+                'timeout' => $this->getTimeout(),
+                'connect_timeout' => $this->getTimeout(),
+                'read_timeout' => $this->getTimeout(),
             ];
         }
 
@@ -44,7 +39,7 @@ class PureSender implements SenderInterface
 
         $body = $response->getBody();
         while (! $body->eof()) {
-            echo $body->read($this->bufferSize);
+            echo $body->read($this->getBufferSize());
             flush();
         }
     }
