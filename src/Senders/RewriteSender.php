@@ -5,7 +5,7 @@ namespace Akrez\HttpProxy\Senders;
 use GuzzleHttp\Client;
 use Psr\Http\Message\RequestInterface;
 
-class PureSender extends Sender
+class RewriteSender extends Sender
 {
     public function emitRequest(RequestInterface $newRequest)
     {
