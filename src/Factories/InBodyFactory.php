@@ -2,14 +2,20 @@
 
 namespace Akrez\HttpProxy\Factories;
 
+use Akrez\HttpProxy\Interfaces\FactoryInterface;
+use Exception;
 use GuzzleHttp\Psr7\Message;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class InBodyFactory
+class InbodyFactory implements FactoryInterface
 {
-    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?RequestInterface
+    public static function make(ServerRequestInterface $globalServerRequest): ?RequestInterface
     {
-        return Message::parseRequest((string) $globalServerRequest->getBody());
+        try {
+            return Message::parseRequest((string) $globalServerRequest->getBody());
+        } catch (Exception $e) {
+            return null;
+        }
     }
 }

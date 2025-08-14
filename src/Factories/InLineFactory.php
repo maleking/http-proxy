@@ -2,15 +2,15 @@
 
 namespace Akrez\HttpProxy\Factories;
 
+use Akrez\HttpProxy\Interfaces\FactoryInterface;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 
-class InLineFactory
+class InlineFactory implements FactoryInterface
 {
-    public static function fromServerRequest(ServerRequestInterface $globalServerRequest): ?RequestInterface
+    public static function make(ServerRequestInterface $globalServerRequest): ?RequestInterface
     {
         $serverParams = $globalServerRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
 
@@ -38,18 +38,8 @@ class InLineFactory
 
         $newUri = static::createUri($globalServerRequest, $sanitizedConfigs, $hostPathString);
 
-        return static::toNewServerRequest(
-            $globalServerRequest,
-            $newUri,
-            $sanitizedConfigs['method']
-        );
-    }
+        $method = $sanitizedConfigs['method'];
 
-    protected static function toNewServerRequest(
-        ServerRequestInterface $globalServerRequest,
-        UriInterface $newUri,
-        ?string $method
-    ) {
         $newServerRequest = clone $globalServerRequest;
 
         $newServerRequest = $newServerRequest->withUri($newUri);

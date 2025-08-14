@@ -2,28 +2,31 @@
 
 namespace Akrez\HttpProxy\Senders;
 
+use Akrez\HttpProxy\Interfaces\SenderInterface;
 use Psr\Http\Message\RequestInterface;
 
-class CurlSender
+class CurlSender implements SenderInterface
 {
+    public $timeout = null;
+
     public $bufferSize = 128;
 
-    public function emit(RequestInterface $newServerRequest, $timeout = null)
+    public function emit(RequestInterface $newRequest)
     {
-        $newServerRequest = $newServerRequest
+        $newRequest = $newRequest
             ->withoutHeader('Accept-Encoding')
             ->withHeader('Accept-Encoding', 'identity');
 
-        $url = (string) $newServerRequest->getUri();
+        $url = (string) $newRequest->getUri();
 
         $headers = [];
-        foreach ($newServerRequest->getHeaders() as $name => $values) {
+        foreach ($newRequest->getHeaders() as $name => $values) {
             $headers[] = $name.': '.implode(', ', $values);
         }
 
         $options = [
-            CURLOPT_CONNECTTIMEOUT => $timeout,
-            CURLOPT_TIMEOUT => $timeout,
+            CURLOPT_CONNECTTIMEOUT => $this->timeout,
+            CURLOPT_TIMEOUT => $this->timeout,
 
             CURLOPT_RETURNTRANSFER => false,
             CURLOPT_HEADER => false,
@@ -43,8 +46,8 @@ class CurlSender
             CURLOPT_BUFFERSIZE => $this->bufferSize,
 
             CURLOPT_URL => $url,
-            CURLOPT_CUSTOMREQUEST => $newServerRequest->getMethod(),
-            CURLOPT_POSTFIELDS => (string) $newServerRequest->getBody(),
+            CURLOPT_CUSTOMREQUEST => $newRequest->getMethod(),
+            CURLOPT_POSTFIELDS => (string) $newRequest->getBody(),
             CURLOPT_HTTPHEADER => $headers,
 
             CURLOPT_HTTP_CONTENT_DECODING => false,
