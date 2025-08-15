@@ -113,10 +113,18 @@ class RewriteSender extends Sender
         $response = $this->contentAfterReceivedResponse($newRequest, $response);
         $response = $response->withoutHeader('transfer-encoding');
 
-        http_response_code($response->getStatusCode());
-        foreach ($response->getHeaders() as $headerKey => $headers) {
-            header($headerKey.': '.implode(', ', $headers), false);
+        header_remove();
+        foreach ($response->getHeaders() as $header => $values) {
+            foreach ($values as $value) {
+                header("$header: $value", false);
+            }
         }
+        header(sprintf(
+            'HTTP/%s %d %s',
+            $response->getProtocolVersion(),
+            $response->getStatusCode(),
+            $response->getReasonPhrase(),
+        ), true, $response->getStatusCode());
 
         $body = $response->getBody();
         while (! $body->eof()) {
