@@ -35,7 +35,7 @@ class RewriteSender extends Sender
 
     public function setScriptUrl(string $scriptUrl)
     {
-        $this->scriptUrl = $scriptUrl;
+        $this->scriptUrl = trim($scriptUrl, " \n\r\t\v\0/");
 
         return $this;
     }
@@ -88,22 +88,15 @@ class RewriteSender extends Sender
         return $url->toString();
     }
 
-    protected function beforeSendRequest(RequestInterface $newRequest)
-    {
-        $newRequest = parent::beforeSendRequest($newRequest);
-
-        $newRequest = $this->cookieBeforeSendRequest($newRequest);
-
-        return $newRequest;
-    }
-
     protected function emitRequest(RequestInterface $newRequest)
     {
+        $newRequest = $this->cookieBeforeSendRequest($newRequest);
+
         $clientConfig = [
             'verify' => false,
             'allow_redirects' => false,
             'referer' => false,
-            'decode_content' => false,
+            'decode_content' => true,
             'http_errors' => false,
         ];
         if ($this->timeout !== null) {
@@ -113,12 +106,12 @@ class RewriteSender extends Sender
                 'read_timeout' => $this->timeout,
             ];
         }
+        $response = (new Client($clientConfig))->send($newRequest);
 
-        $client = new Client($clientConfig);
-
-        $response = $client->send($newRequest);
-
-        $response = $this->afterReceivedResponse($newRequest, $response);
+        $response = $this->locationAfterReceivedResponse($newRequest, $response);
+        $response = $this->cookieAfterReceivedResponse($newRequest, $response);
+        $response = $this->contentAfterReceivedResponse($newRequest, $response);
+        $response = $response->withoutHeader('transfer-encoding');
 
         http_response_code($response->getStatusCode());
         foreach ($response->getHeaders() as $headerKey => $headers) {
@@ -130,17 +123,6 @@ class RewriteSender extends Sender
             echo $body->read($this->bufferSize);
             flush();
         }
-    }
-
-    protected function afterReceivedResponse(RequestInterface $newRequest, ResponseInterface $response)
-    {
-        $response = $this->locationAfterReceivedResponse($newRequest, $response);
-
-        $response = $this->cookieAfterReceivedResponse($newRequest, $response);
-
-        $response = $this->contentAfterReceivedResponse($newRequest, $response);
-
-        return $response->withoutHeader('transfer-encoding');
     }
 
     protected function cookieAfterReceivedResponse(RequestInterface $newRequest, ResponseInterface $response)

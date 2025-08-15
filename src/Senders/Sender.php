@@ -36,7 +36,9 @@ abstract class Sender
 
     public function emit(RequestInterface $newRequest)
     {
-        $this->beforeSendRequest($newRequest);
+        $newRequest = $newRequest
+            ->withoutHeader('Accept-Encoding')
+            ->withHeader('Accept-Encoding', 'identity');
 
         if ($this->debug) {
             echo nl2br(Message::toString($newRequest));
@@ -48,13 +50,6 @@ abstract class Sender
         } else {
             $this->emitRequest($newRequest);
         }
-    }
-
-    protected function beforeSendRequest(RequestInterface $newRequest)
-    {
-        return $newRequest
-            ->withoutHeader('Accept-Encoding')
-            ->withHeader('Accept-Encoding', 'identity');
     }
 
     abstract protected function emitRequest(RequestInterface $requestInterface);

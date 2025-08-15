@@ -26,11 +26,6 @@ abstract class Rewriter
         return $contentType === trim(preg_replace('@;.*@', '', reset($contentTypes)));
     }
 
-    protected static function trim(string $url)
-    {
-        return trim($url, " \n\r\t\v\0/");
-    }
-
     protected static function startsWith($haystack, $needles)
     {
         foreach ((array) $needles as $needle) {

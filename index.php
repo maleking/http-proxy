@@ -1,23 +1,37 @@
 <?php
 
+use Akrez\HttpProxy\Senders\CurlSender;
+use Akrez\HttpProxy\Senders\RewriteSender;
 use GuzzleHttp\Psr7\ServerRequest;
 
 require_once './vendor/autoload.php';
 
-function handle(
-    $factory = 'InlineFactory',
-    $sender = 'CurlSender',
-    $debug = false
-) {
-    $factoryClassName = "Akrez\\HttpProxy\\Factories\\{$factory}";
-    $senderClassName = "Akrez\\HttpProxy\\Senders\\{$sender}";
+function handle($mode, $debug = false)
+{
+    if ($mode == 'inbody') {
+        $factoryClassName = 'InbodyFactory';
+        $senderClassName = 'CurlSender';
+    } elseif ($mode == 'rewrite') {
+        $factoryClassName = 'InlineFactory';
+        $senderClassName = 'RewriteSender';
+    } else {
+        $factoryClassName = 'InlineFactory';
+        $senderClassName = 'CurlSender';
+    }
     //
     $serverRequest = ServerRequest::fromGlobals();
     //
-    $newRequest = $factoryClassName::make($serverRequest);
+    $newRequest = "Akrez\\HttpProxy\\Factories\\{$factoryClassName}"::make($serverRequest);
+    //
+    if ($senderClassName == 'RewriteSender') {
+        $sender = new RewriteSender($serverRequest);
+    } else {
+        $sender = new CurlSender;
+    }
+    //
     if ($newRequest) {
-        return (new $senderClassName)->setDebug($debug)->emit($newRequest);
+        return $sender->setDebug($debug)->emit($newRequest);
     }
 }
 
-handle();
+handle('rewrite');

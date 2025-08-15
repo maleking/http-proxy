@@ -25,6 +25,16 @@ class TextHtmlRewriter extends Rewriter
             return str_replace($url, $changed, $matches[0]);
         }, $content);
 
+        $content = preg_replace_callback('@<script[^>]*src=(["\'])(.*?)\1[^>]*>@i', function ($matches) use ($mainPageUrl) {
+            $action = trim($matches[2]);
+            if (! $action) {
+                return '';
+            }
+            $changed = $this->encryptUrl($action, $mainPageUrl);
+
+            return str_replace($action, $changed, $matches[0]);
+        }, $content);
+
         $content = preg_replace_callback('@<form[^>]*action=(["\'])(.*?)\1[^>]*>@i', function ($matches) use ($mainPageUrl) {
             $action = trim($matches[2]);
             if (! $action) {
