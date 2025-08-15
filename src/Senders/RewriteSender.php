@@ -4,6 +4,7 @@ namespace Akrez\HttpProxy\Senders;
 
 use Akrez\HttpProxy\Rewriters\TextCssRewriter;
 use Akrez\HttpProxy\Rewriters\TextHtmlRewriter;
+use Akrez\HttpRunner\SapiEmitter;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SetCookie;
@@ -113,24 +114,7 @@ class RewriteSender extends Sender
         $response = $this->contentAfterReceivedResponse($newRequest, $response);
         $response = $response->withoutHeader('transfer-encoding');
 
-        header_remove();
-        foreach ($response->getHeaders() as $header => $values) {
-            foreach ($values as $value) {
-                header("$header: $value", false);
-            }
-        }
-        header(sprintf(
-            'HTTP/%s %d %s',
-            $response->getProtocolVersion(),
-            $response->getStatusCode(),
-            $response->getReasonPhrase(),
-        ), true, $response->getStatusCode());
-
-        $body = $response->getBody();
-        while (! $body->eof()) {
-            echo $body->read($this->bufferSize);
-            flush();
-        }
+        (new SapiEmitter($this->bufferSize))->emit($response);
     }
 
     protected function cookieAfterReceivedResponse(RequestInterface $newRequest, ResponseInterface $response)
