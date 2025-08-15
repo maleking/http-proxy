@@ -2,11 +2,10 @@
 
 namespace Akrez\HttpProxy\Senders;
 
-use Akrez\HttpProxy\Interfaces\SenderInterface;
 use GuzzleHttp\Psr7\Message;
 use Psr\Http\Message\RequestInterface;
 
-abstract class Sender implements SenderInterface
+abstract class Sender
 {
     protected ?int $timeout = null;
 
@@ -21,21 +20,11 @@ abstract class Sender implements SenderInterface
         return $this;
     }
 
-    public function getTimeout(): ?int
-    {
-        return $this->timeout;
-    }
-
     public function setBufferSize(?int $bufferSize): self
     {
         $this->bufferSize = $bufferSize;
 
         return $this;
-    }
-
-    public function getBufferSize(): ?int
-    {
-        return $this->bufferSize;
     }
 
     public function setDebug(bool $debug): self
@@ -45,49 +34,28 @@ abstract class Sender implements SenderInterface
         return $this;
     }
 
-    public function getDebug(): bool
+    public function emit(RequestInterface $newRequest)
     {
-        return $this->debug;
+        $this->beforeSendRequest($newRequest);
+
+        if ($this->debug) {
+            echo nl2br(Message::toString($newRequest));
+        } elseif ($newRequest->getMethod() === 'CONNECT') {
+            header('Content-Type: application/json; charset=utf-8', true, 200);
+            echo json_encode([
+                'status' => 200,
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        } else {
+            $this->emitRequest($newRequest);
+        }
     }
 
-    public function beforeSend(RequestInterface $newRequest)
+    protected function beforeSendRequest(RequestInterface $newRequest)
     {
         return $newRequest
             ->withoutHeader('Accept-Encoding')
             ->withHeader('Accept-Encoding', 'identity');
     }
 
-    public function emit(RequestInterface $newRequest)
-    {
-        $newRequest = $this->beforeSend($newRequest);
-
-        if ($this->getDebug()) {
-            $this->emitDebug($newRequest);
-
-            return 'debug';
-        }
-
-        if ($newRequest->getMethod() === 'CONNECT') {
-            $this->emitConnect($newRequest);
-
-            return 'connect';
-        }
-
-        $this->emitRequest($newRequest);
-
-        return 'request';
-    }
-
-    public function emitDebug(RequestInterface $newRequest)
-    {
-        echo nl2br(Message::toString($newRequest));
-    }
-
-    public function emitConnect(RequestInterface $newRequest)
-    {
-        header('Content-Type: application/json; charset=utf-8', true, 200);
-        echo json_encode([
-            'status' => 200,
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    }
+    abstract protected function emitRequest(RequestInterface $requestInterface);
 }

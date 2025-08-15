@@ -6,7 +6,7 @@ use Psr\Http\Message\RequestInterface;
 
 class CurlSender extends Sender
 {
-    public function emitRequest(RequestInterface $newRequest)
+    protected function emitRequest(RequestInterface $newRequest)
     {
         $url = (string) $newRequest->getUri();
 
@@ -16,8 +16,8 @@ class CurlSender extends Sender
         }
 
         $options = [
-            CURLOPT_CONNECTTIMEOUT => $this->getTimeout(),
-            CURLOPT_TIMEOUT => $this->getTimeout(),
+            CURLOPT_CONNECTTIMEOUT => $this->timeout,
+            CURLOPT_TIMEOUT => $this->timeout,
 
             CURLOPT_RETURNTRANSFER => false,
             CURLOPT_HEADER => false,
@@ -34,7 +34,7 @@ class CurlSender extends Sender
             CURLOPT_FORBID_REUSE => true,
             CURLOPT_FRESH_CONNECT => true,
 
-            CURLOPT_BUFFERSIZE => $this->getBufferSize(),
+            CURLOPT_BUFFERSIZE => $this->bufferSize,
 
             CURLOPT_URL => $url,
             CURLOPT_CUSTOMREQUEST => $newRequest->getMethod(),
