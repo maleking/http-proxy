@@ -14,7 +14,7 @@ use League\Uri\Uri as LeagueUri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class RewriteSender extends Sender
+class RewriteSender extends CurlSender
 {
     protected string $scriptUrl = '';
 
