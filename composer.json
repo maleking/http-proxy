@@ -8,10 +8,8 @@
         "http"
     ],
     "require": {
-        "php": "^8.1",
-        "guzzlehttp/guzzle": "*",
-        "akrez/http-runner": "*",
-        "league/uri": "*"
+        "php": "^8.0",
+        "guzzlehttp/guzzle": "*"
     },
     "require-dev": {
         "symfony/var-dumper": "*"
@@ -23,7 +21,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.1"
+            "php": "8.0"
         },
         "sort-packages": true
     },

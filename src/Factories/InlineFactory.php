@@ -2,43 +2,16 @@
 
 namespace Akrez\HttpProxy\Factories;
 
-use Akrez\HttpProxy\Interfaces\FactoryInterface;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class InlineFactory implements FactoryInterface
+class InlineFactory
 {
-    public static function make(ServerRequestInterface $globalServerRequest): ?RequestInterface
+    public static function make(ServerRequestInterface $globalServerRequest, string $scheme, string $method, string $hostPathString): ?RequestInterface
     {
-        $serverParams = $globalServerRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
-
-        $requestUri = $serverParams['REQUEST_URI'];
-        $scriptNameSlash = $serverParams['SCRIPT_NAME'].'/';
-
-        if (
-            strpos($requestUri, $scriptNameSlash) === 0 and
-            strlen($scriptNameSlash) < strlen($requestUri)
-        ) {
-            $url = substr($requestUri, strlen($scriptNameSlash));
-        } else {
-            return null;
-        }
-
-        [
-            0 => $configString,
-            1 => $hostPathString,
-        ] = explode('/', $url, 2) + [0 => null, 1 => null];
-        if (empty($configString) || empty($hostPathString)) {
-            return null;
-        }
-
-        $sanitizedConfigs = static::sanitizeConfig($globalServerRequest, explode('_', $configString));
-
-        $newUri = static::createUri($globalServerRequest, $sanitizedConfigs, $hostPathString);
-
-        $method = $sanitizedConfigs['method'];
+        $newUri = static::createUri($globalServerRequest, $scheme, $hostPathString);
 
         $newServerRequest = clone $globalServerRequest;
 
@@ -57,17 +30,9 @@ class InlineFactory implements FactoryInterface
         return $newServerRequest;
     }
 
-    protected static function sanitizeConfig(ServerRequestInterface $globalServerRequest, array $configs): array
+    protected static function createUri(ServerRequestInterface $serverRequest, string $scheme, string $hostPathString)
     {
-        return [
-            'method' => static::findInArray($configs, ['get', 'post', 'head', 'put', 'delete', 'options', 'trace', 'connect', 'patch'], $globalServerRequest->getMethod()),
-            'scheme' => static::findInArray($configs, ['https', 'http'], $globalServerRequest->getUri()->getScheme()),
-        ];
-    }
-
-    protected static function createUri(ServerRequestInterface $serverRequest, array $sanitizedConfigs, string $hostPathString)
-    {
-        $uri = new Uri($sanitizedConfigs['scheme'].'://'.$hostPathString);
+        $uri = new Uri($scheme.'://'.$hostPathString);
         $uri = $uri->withQuery($serverRequest->getUri()->getQuery());
         $uri = $uri->withFragment($serverRequest->getUri()->getFragment());
 
@@ -110,16 +75,5 @@ class InlineFactory implements FactoryInterface
         }
 
         return new MultipartStream($elements, $multipartBoundary);
-    }
-
-    protected static function findInArray(array $needles, array $haystack, ?string $default = null): ?string
-    {
-        foreach ($needles as $needle) {
-            if (in_array(strtolower($needle), $haystack)) {
-                return $needle;
-            }
-        }
-
-        return $default;
     }
 }

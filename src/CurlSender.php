@@ -1,6 +1,6 @@
 <?php
 
-namespace Akrez\HttpProxy\Senders;
+namespace Akrez\HttpProxy;
 
 use GuzzleHttp\Psr7\Message;
 use Psr\Http\Message\RequestInterface;
