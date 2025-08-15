@@ -18,19 +18,19 @@ abstract class Rewriter
         return $this->rewriteSender->encryptUrl($urlString, $mainUrlString);
     }
 
-    public static function isContentType(string $contentType, ResponseInterface $response)
+    protected static function isContentType(string $contentType, ResponseInterface $response)
     {
         $contentTypes = (array) $response->getHeader('Content-Type');
 
         return $contentType === trim(preg_replace('@;.*@', '', reset($contentTypes)));
     }
 
-    public static function trim(string $url)
+    protected static function trim(string $url)
     {
         return trim($url, " \n\r\t\v\0/");
     }
 
-    public static function startsWith($haystack, $needles)
+    protected static function startsWith($haystack, $needles)
     {
         foreach ((array) $needles as $needle) {
             if ($needle !== '' && stripos($haystack, $needle) === 0) {
