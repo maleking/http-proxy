@@ -33,5 +33,3 @@ function handle($mode, $debug = false)
         return $sender->setDebug($debug)->emit($newRequest);
     }
 }
-
-handle('rewrite');
