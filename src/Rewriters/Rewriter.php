@@ -3,15 +3,16 @@
 namespace Akrez\HttpProxy\Rewriters;
 
 use Akrez\HttpProxy\Senders\RewriteSender;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class Rewriter
 {
     public function __construct(protected RewriteSender $rewriteSender) {}
 
-    abstract public function convert($body, $mainPageUrl);
+    abstract public function convert($content, $mainPageUrl);
 
-    abstract public function isMine($response);
+    abstract public function isMine(RequestInterface $newRequest, ResponseInterface $response);
 
     public function encryptUrl(string $urlString, ?string $mainUrlString = null)
     {
