@@ -7,39 +7,43 @@ use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class InlineFactory
+class InlineFactory extends Factory
 {
-    public static function make(ServerRequestInterface $globalServerRequest, string $scheme, string $method, string $hostPathString): ?RequestInterface
+    public function make(): ?RequestInterface
     {
-        $newUri = static::createUri($globalServerRequest, $scheme, $hostPathString);
-
-        $newServerRequest = clone $globalServerRequest;
-
-        $newServerRequest = $newServerRequest->withUri($newUri);
-        if ($method) {
-            $newServerRequest = $newServerRequest->withMethod($method);
+        if (empty($this->hostPath)) {
+            return null;
         }
 
-        $multipartBoundary = static::getMultipartBoundary($globalServerRequest);
+        $newUri = $this->createUri($this->globalServerRequest, $this->scheme, $this->hostPath);
+
+        $newServerRequest = clone $this->globalServerRequest;
+
+        $newServerRequest = $newServerRequest->withUri($newUri);
+        if ($this->method) {
+            $newServerRequest = $newServerRequest->withMethod($this->method);
+        }
+
+        $multipartBoundary = $this->getMultipartBoundary($this->globalServerRequest);
         if ($multipartBoundary) {
             $newServerRequest = $newServerRequest->withBody(
-                static::getMultipartStream($multipartBoundary, $globalServerRequest)
+                $this->getMultipartStream($multipartBoundary, $this->globalServerRequest)
             );
         }
 
         return $newServerRequest;
     }
 
-    protected static function createUri(ServerRequestInterface $serverRequest, string $scheme, string $hostPathString)
+    protected function createUri(ServerRequestInterface $serverRequest, string $scheme, string $hostPath)
     {
-        $uri = new Uri($scheme.'://'.$hostPathString);
+        $uri = new Uri($scheme.'://'.$hostPath);
         $uri = $uri->withQuery($serverRequest->getUri()->getQuery());
         $uri = $uri->withFragment($serverRequest->getUri()->getFragment());
 
         return $uri;
     }
 
-    protected static function getMultipartBoundary(ServerRequestInterface $globalServerRequest): ?string
+    protected function getMultipartBoundary(ServerRequestInterface $globalServerRequest): ?string
     {
         $contentType = $globalServerRequest->getHeaderLine('Content-Type');
 
@@ -53,7 +57,7 @@ class InlineFactory
         return null;
     }
 
-    protected static function getMultipartStream(string $multipartBoundary, ServerRequestInterface $globalServerRequest)
+    protected function getMultipartStream(string $multipartBoundary, ServerRequestInterface $globalServerRequest)
     {
         $elements = [];
 
