@@ -1,25 +1,28 @@
 <?php
 
 use Akrez\HttpProxy\CurlSender;
+use Akrez\HttpProxy\Factories\InbodyFactory;
+use Akrez\HttpProxy\Factories\InlineFactory;
 use GuzzleHttp\Psr7\ServerRequest;
 
 require_once './vendor/autoload.php';
 
-function handle($mode, $debug = false)
+function inline()
 {
-    if ($mode == 'inbody') {
-        $factoryClassName = 'InbodyFactory';
-    } else {
-        $factoryClassName = 'InlineFactory';
-    }
-    //
     $serverRequest = ServerRequest::fromGlobals();
-    //
-    $newRequest = "Akrez\\HttpProxy\\Factories\\{$factoryClassName}"::make($serverRequest);
-    //
-    $sender = new CurlSender;
-    //
+    $factory = new InlineFactory($serverRequest);
+    $newRequest = $factory->make();
     if ($newRequest) {
-        return $sender->setDebug($debug)->emit($newRequest);
+        (new CurlSender)->setDebug($factory->debug())->emit($newRequest);
+    }
+}
+
+function inbody()
+{
+    $serverRequest = ServerRequest::fromGlobals();
+    $factory = new InbodyFactory($serverRequest);
+    $newRequest = $factory->make();
+    if ($newRequest) {
+        (new CurlSender)->setDebug($factory->debug())->emit($newRequest);
     }
 }

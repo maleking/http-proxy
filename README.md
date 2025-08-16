@@ -5,7 +5,7 @@
 
 ## Requirements
 
-- PHP 8.1 or higher.
+- PHP 8.0 or higher.
 
 ## Installation
 
