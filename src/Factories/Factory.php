@@ -2,9 +2,10 @@
 
 namespace Akrez\HttpProxy\Factories;
 
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class Factory
+abstract class Factory
 {
     protected ?string $method;
 
@@ -66,4 +67,6 @@ class Factory
 
         return $default;
     }
+
+    abstract public function make(): ?RequestInterface;
 }
