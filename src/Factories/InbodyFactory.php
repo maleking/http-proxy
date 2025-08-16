@@ -5,7 +5,6 @@ namespace Akrez\HttpProxy\Factories;
 use Exception;
 use GuzzleHttp\Psr7\Message;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 class InbodyFactory extends Factory
 {

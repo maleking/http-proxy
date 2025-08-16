@@ -27,7 +27,7 @@ def request(flow: HTTPFlow):
 
     flow.request.headers.clear()
 
-    flow.request.path            = new_uri.path
+    flow.request.path            = new_uri.path + "/" + flow.request.scheme
     flow.request.method          = "POST"
     flow.request.scheme          = new_scheme
     flow.request.host            = new_uri.hostname

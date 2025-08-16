@@ -7,11 +7,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 abstract class Factory
 {
-    protected ?string $method;
+    protected ?string $method = null;
 
-    protected ?string $scheme;
+    protected ?string $scheme = null;
 
-    protected ?string $hostPath;
+    protected ?string $hostPath = null;
 
     protected bool $debug = false;
 
