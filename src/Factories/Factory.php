@@ -17,16 +17,17 @@ abstract class Factory
 
     public function __construct(protected ServerRequestInterface $globalServerRequest)
     {
-        $serverParams = $globalServerRequest->getServerParams() + ['REQUEST_URI' => null, 'SCRIPT_NAME' => null];
-
-        $requestUri = $serverParams['REQUEST_URI'];
-        $scriptNameSlash = $serverParams['SCRIPT_NAME'].'/';
+        [
+            'SCRIPT_NAME' => $scriptName,
+            'REQUEST_URI' => $requestUri,
+        ] = $globalServerRequest->getServerParams() + ['SCRIPT_NAME' => null, 'REQUEST_URI' => null];
 
         if (
-            strpos($requestUri, $scriptNameSlash) === 0 and
-            strlen($scriptNameSlash) < strlen($requestUri)
+            strpos($requestUri, $scriptName) === 0 and
+            strlen($scriptName) <= strlen($requestUri)
         ) {
-            $url = substr($requestUri, strlen($scriptNameSlash));
+            $url = substr($requestUri, strlen($scriptName));
+            $url = ltrim($url, " \n\r\t\v\0/");
         } else {
             return null;
         }

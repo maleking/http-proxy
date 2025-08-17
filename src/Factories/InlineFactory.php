@@ -34,7 +34,7 @@ class InlineFactory extends Factory
         return $newServerRequest;
     }
 
-    protected function createUri(ServerRequestInterface $serverRequest, string $scheme, string $hostPath)
+    private function createUri(ServerRequestInterface $serverRequest, string $scheme, string $hostPath)
     {
         $uri = new Uri($scheme.'://'.$hostPath);
         $uri = $uri->withQuery($serverRequest->getUri()->getQuery());
@@ -43,7 +43,7 @@ class InlineFactory extends Factory
         return $uri;
     }
 
-    protected function getMultipartBoundary(ServerRequestInterface $globalServerRequest): ?string
+    private function getMultipartBoundary(ServerRequestInterface $globalServerRequest): ?string
     {
         $contentType = $globalServerRequest->getHeaderLine('Content-Type');
 
@@ -57,7 +57,7 @@ class InlineFactory extends Factory
         return null;
     }
 
-    protected function getMultipartStream(string $multipartBoundary, ServerRequestInterface $globalServerRequest)
+    private function getMultipartStream(string $multipartBoundary, ServerRequestInterface $globalServerRequest)
     {
         $elements = [];
 
