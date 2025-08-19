@@ -2,6 +2,7 @@
 
 namespace Akrez\HttpProxy\Factories;
 
+use Akrez\HttpProxy\Factory;
 use Exception;
 use GuzzleHttp\Psr7\Message;
 use Psr\Http\Message\RequestInterface;

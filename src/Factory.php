@@ -1,7 +1,8 @@
 <?php
 
-namespace Akrez\HttpProxy\Factories;
+namespace Akrez\HttpProxy;
 
+use GuzzleHttp\Psr7\ServerRequest;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -67,6 +68,18 @@ abstract class Factory
         }
 
         return $default;
+    }
+
+    public static function emitSender(Sender $sender): ?RequestInterface
+    {
+        $serverRequest = ServerRequest::fromGlobals();
+        $factory = new static($serverRequest);
+        $newRequest = $factory->make();
+        if ($newRequest) {
+            $sender->setDebug($factory->debug())->emit($newRequest);
+        }
+
+        return $newRequest;
     }
 
     abstract public function make(): ?RequestInterface;

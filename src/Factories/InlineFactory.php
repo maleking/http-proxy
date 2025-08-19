@@ -2,6 +2,7 @@
 
 namespace Akrez\HttpProxy\Factories;
 
+use Akrez\HttpProxy\Factory;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
