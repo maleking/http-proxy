@@ -34,7 +34,7 @@
 2. پس از رسیدن درخواست دستکاری‌شده به هاست پراکسی، درخواست اصلی بازیابی شده، پردازش می‌شود و پاسخ به کاربر
    بازگردانده می‌شود.
 
-```plaintext
+```http
 ==OriginalRequest==>
 (local http proxy server: manipulate request to change method and url)
 ==ManipulatedRequest==>
@@ -67,13 +67,13 @@ Content-Type: application/json
 
 آدرس درخواست را طوری تغییر می‌دهیم که به هاست پراکسی برسد. مثلاً:
 
-```
+```http
 https://www.blocked.com/sensored/content.json
 ```
 
 تبدیل می‌شود به:
 
-```
+```http
 https://www.proxy-host.com/inline.php/https_OPTIONS/www.blocked.com/sensored/content.json
 ```
 
