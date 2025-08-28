@@ -161,7 +161,7 @@ Host: www.proxy-host.com
    host_header=proxy-php-host.com
    ```
 
-MitmProxy را با پارامترهای زیر اجرا کنید:
+با پارامترهای زیر MitmProxy را اجرا کنید:
 
    ```bash
    .\mitmdump.exe -q -s inline.py \
