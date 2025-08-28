@@ -131,8 +131,7 @@ Host: www.proxy-host.com
 
 ریپوزیتوری را کلون کنید تا فایل‌ها را در اختیار داشته باشید.
 
-یکی از نسخه‌های پرتابل MitmProxy را از  
-   <https://www.mitmproxy.org/downloads/> دانلود کرده و فایل `mitmdump.exe` را به پوشه `client` منتقل کنید.
+یکی از نسخه‌های پرتابل MitmProxy را از <https://www.mitmproxy.org/downloads> دانلود کرده و فایل `mitmdump.exe` را به پوشه `client` منتقل کنید.
 
 گواهی‌های MitmProxy را نصب کنید:
 
