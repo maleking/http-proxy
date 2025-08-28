@@ -122,12 +122,12 @@ Host: www.proxy-host.com
 
 ## آیا باید دستی URL‌ها را تغییر دهیم؟
 
+<div dir="rtl">
+
 خیر. برای این کار از **MitmProxy** استفاده می‌کنیم تا درخواست‌ها به صورت خودکار دستکاری شوند. فایل‌های مورد نیاز
 در مسیر `client/inline.py` قرار دارند.
 
 ### مراحل نصب و راه‌اندازی
-
-<div dir="rtl">
 
 ریپوزیتوری را کلون کنید تا فایل‌ها را در اختیار داشته باشید.
 
@@ -137,7 +137,6 @@ Host: www.proxy-host.com
 
 > - یک بار `mitmdump.exe` را اجرا کنید تا فایل‌های گواهی ایجاد شوند.
 > - سپس دستور زیر را اجرا کنید:
->
 >   ```bash
 >   certutil -addstore root "%USERPROFILE%\.mitmproxy\mitmproxy-ca-cert.cer"
 >   ```
