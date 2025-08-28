@@ -85,7 +85,7 @@ https://www.blocked.com/sensored/content.json
 https://www.proxy-host.com/inline.php/https_OPTIONS/www.blocked.com/sensored/content.json
 ```
 
-در این حالت، درخواست زیر ارسال می‌شود:
+پس در این حالت، درخواست زیر به جای درخواست اصلی (در این مثال یعنی درخواست بالا) ارسال می‌شود:
 
 ```http
 POST /inline.php/https_OPTIONS/www.blocked.com/sensored/content.json HTTP/1.1
