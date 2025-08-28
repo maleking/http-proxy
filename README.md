@@ -100,7 +100,7 @@ Host: www.proxy-host.com
 
 | بخش | توضیح |
 |-----|-------|
-| `https://www.proxy-host.com/inline.php` | مسیر اسکریپت روی هاست اشتراکی. می‌تواند به عنوان توکن برای هر کاربر نیز عمل کند. |
+| `https://www.proxy-host.com/inline.php` | مسیر اسکریپت روی هاست اشتراکی. می‌تواند به عنوان توکن برای هر کاربر نیز عمل کند. یعنی اسکریپت میتواند روی فایل `unpredictable_personal_token.php` به جای `inline.php` هاست شود |
 | `https_OPTIONS` | بخش کانفیگ: پروتکل و متد. با `_` جدا می‌شوند و اختیاری‌اند. می‌توانید `debug` هم اضافه کنید (`https_OPTIONS_debug`). |
 | `www.blocked.com/sensored/content.json` | آدرس اصلی درخواست همراه با تمام پارامترها. |
 
