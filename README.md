@@ -137,6 +137,7 @@ Host: www.proxy-host.com
 
 > - یک بار `mitmdump.exe` را اجرا کنید تا فایل‌های گواهی ایجاد شوند.
 > - سپس دستور زیر را اجرا کنید:
+>
 >   ```bash
 >   certutil -addstore root "%USERPROFILE%\.mitmproxy\mitmproxy-ca-cert.cer"
 >   ```
