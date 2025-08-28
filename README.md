@@ -74,15 +74,13 @@
   </li>
 </ol>
 
-<div>
-  <code class="language-plaintext">
-  ==OriginalRequest==><br />
-  (local http proxy server: manipulate request to change method and url)<br />
-  ==ManipulatedRequest==><br />
-  (proxy shared host: recover original request using script and resolve it and return response)<br />
-  ==Response==>
-  </code>
-</div>
+<code class="language-plaintext">
+==OriginalRequest==><br />
+(local http proxy server: manipulate request to change method and url)<br />
+==ManipulatedRequest==><br />
+(proxy shared host: recover original request using script and resolve it and return response)<br />
+==Response==>
+</code>
 
 <h2>بیایید با یک مثال بررسی کنیم</h2>
 
@@ -92,16 +90,14 @@
   ارسال کنیم:
 </p>
 
-<pre>
-  <code class="language-http">
+<code>
 OPTIONS /sensored/content.json HTTP/1.1<br />
 User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)<br />
 Host: www.blocked.com<br />
 Content-Type: application/json<br />
 <br />
 { "name": "John Doe", "email": "john.doe@example.com" }<br />
-  </code>
-</pre>
+</code>
 
 <h3>محدودیت‌ها</h3>
 
@@ -134,20 +130,20 @@ Content-Type: application/json<br />
 
 <p>تبدیل می‌شود به:</p>
 
-<pre>
+<code>
   <code>
   https://www.proxy-host.com/inline.php/https_OPTIONS/www.blocked.com/sensored/content.json
 
 </code>
 
-</pre>
+</code>
 
 <p>
   پس در این حالت، درخواست زیر به جای درخواست اصلی (در این مثال یعنی درخواست
   بالا) ارسال می‌شود:
 </p>
 
-<pre>
+<code>
   <code class="language-http">
 POST /inline.php/https_OPTIONS/www.blocked.com/sensored/content.json HTTP/1.1<br />
 User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)<br />
@@ -157,7 +153,7 @@ Host: www.proxy-host.com<br />
 { "name": "John Doe", "email": "john.doe@example.com" }
 </code>
 
-</pre>
+</code>
 
 <h3>توضیح بخش‌های URL</h3>
 
@@ -179,7 +175,7 @@ Host: www.proxy-host.com<br />
       <td>
         مسیر اسکریپت روی هاست اشتراکی. می‌تواند به عنوان توکن برای هر کاربر نیز
         عمل کند. یعنی اسکریپت میتواند روی فایل
-        <code> unpredictable_personal_token.php </code>
+        <code> uncodedictable_personal_token.php </code>
         به جای <code> inline.php </code>
         هاست شود
       </td>
@@ -252,12 +248,12 @@ Host: www.proxy-host.com<br />
       <li>
         <p>سپس دستور زیر را اجرا کنید:</p>
 
-        <pre>
+        <code>
           <code class="language-bash">
             certutil -addstore root "%USERPROFILE%\.mitmproxy\mitmproxy-ca-cert.cer"
           </code>
         
-        </pre>
+        </code>
       </li>
 
       <li>
@@ -272,27 +268,27 @@ Host: www.proxy-host.com<br />
       تغییر نام داده و مقادیر زیر را ویرایش کنید:
     </p>
 
-    <pre>
+    <code>
       <code class="language-ini">
 [inline]<br />
 url=https://proxy-php-host.com/inline.php<br />
 ; host_header=proxy-php-host.com
       </code>
-    </pre>
+    </code>
     <p>در صورت استفاده از IP:</p>
-    <pre>
+    <code>
       <code class="language-ini">
 [inline]<br />
 url=https://100.100.100.100/inline.php<br />
 host_header=proxy-php-host.com
       </code>
-    </pre>
+    </code>
   </li>
 
   <li>
     <p>MitmProxy را با پارامترهای زیر اجرا کنید:</p>
 
-    <pre>
+    <code>
       <code class="language-bash">
       .\mitmdump.exe -q -s inline.py \
   --set listen_port=8080 \
@@ -303,7 +299,7 @@ host_header=proxy-php-host.com
 
 </code>
 
-</pre>
+</code>
   </li>
 
   <li>
