@@ -74,7 +74,7 @@
   </li>
 </ol>
 
-<pre>
+<div>
   <code class="language-plaintext">
   ==OriginalRequest==><br />
   (local http proxy server: manipulate request to change method and url)<br />
@@ -82,7 +82,7 @@
   (proxy shared host: recover original request using script and resolve it and return response)<br />
   ==Response==>
   </code>
-</pre>
+</div>
 
 <h2>بیایید با یک مثال بررسی کنیم</h2>
 
@@ -126,12 +126,11 @@ Content-Type: application/json<br />
 
 <p>آدرس درخواست را طوری تغییر می‌دهیم که به هاست پراکسی برسد. مثلاً:</p>
 
-<pre>
+<div>
   <code>
   https://www.blocked.com/sensored/content.json
   </code>
-
-</pre>
+</div>
 
 <p>تبدیل می‌شود به:</p>
 
