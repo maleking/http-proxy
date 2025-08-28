@@ -74,8 +74,7 @@
   </li>
 </ol>
 
-<code class="language-plaintext">
-==OriginalRequest==>
+<code>==OriginalRequest==>
 (local http proxy server: manipulate request to change method and url)
 ==ManipulatedRequest==>
 (proxy shared host: recover original request using script and resolve it and return response)
@@ -90,13 +89,12 @@
   ارسال کنیم:
 </p>
 
-<code>
-OPTIONS /sensored/content.json HTTP/1.1<br />
-User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)<br />
-Host: www.blocked.com<br />
-Content-Type: application/json<br />
-<br />
-{ "name": "John Doe", "email": "john.doe@example.com" }<br />
+<code>OPTIONS /sensored/content.json HTTP/1.1
+User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+Host: www.blocked.com
+Content-Type: application/json
+
+{ "name": "John Doe", "email": "john.doe@example.com" }
 </code>
 
 <h3>محدودیت‌ها</h3>
@@ -143,16 +141,12 @@ Content-Type: application/json<br />
   بالا) ارسال می‌شود:
 </p>
 
-<code>
-  <code class="language-http">
-POST /inline.php/https_OPTIONS/www.blocked.com/sensored/content.json HTTP/1.1<br />
-User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)<br />
-Content-Type: application/json<br />
-Host: www.proxy-host.com<br />
-<br />
-{ "name": "John Doe", "email": "john.doe@example.com" }
-</code>
+  <code>POST /inline.php/https_OPTIONS/www.blocked.com/sensored/content.json HTTP/1.1
+User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+Content-Type: application/json
+Host: www.proxy-host.com
 
+{ "name": "John Doe", "email": "john.doe@example.com" }
 </code>
 
 <h3>توضیح بخش‌های URL</h3>
