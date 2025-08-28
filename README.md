@@ -75,10 +75,10 @@
 </ol>
 
 <code class="language-plaintext">
-==OriginalRequest==><br />
-(local http proxy server: manipulate request to change method and url)<br />
-==ManipulatedRequest==><br />
-(proxy shared host: recover original request using script and resolve it and return response)<br />
+==OriginalRequest==>
+(local http proxy server: manipulate request to change method and url)
+==ManipulatedRequest==>
+(proxy shared host: recover original request using script and resolve it and return response)
 ==Response==>
 </code>
 
