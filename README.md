@@ -47,11 +47,7 @@
    بازگردانده می‌شود.
 
 ```ini
-==OriginalRequest==>
-(local http proxy server: manipulate request to change method and url)
-==ManipulatedRequest==>
-(proxy shared host: recover original request using script and resolve it and return response)
-==Response==>
+==OriginalRequest==> (local http proxy server: manipulate request to change method and url) ==ManipulatedRequest==> (proxy shared host: recover original request using script and resolve it and return response) ==Response==>
 ```
 
 </div>
